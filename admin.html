@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SER+ | Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #009C3B; --green-dark: #007A2E; --green-light: #E8F8EE;
+    --green-mid: #C5EDDA; --off-white: #F7FAF8; --gray-light: #F0F4F2;
+    --gray: #8A9E94; --gray-dark: #3D4F46; --black: #1A2620;
+    --red: #E53935; --red-light: #FFEBEE; --yellow: #F9A825; --yellow-light: #FFFDE7;
+    --blue: #1565C0; --blue-light: #E3F2FD; --sidebar-w: 240px;
+    --font-display: 'Baloo 2', cursive; --font-body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--off-white); color: var(--black); display: flex; min-height: 100vh; }
+
+  /* ── TELA DE ACESSO NEGADO ── */
+  .access-denied {
+    position: fixed; inset: 0; background: var(--off-white);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; flex-direction: column; gap: 16px; text-align: center;
+  }
+  .access-denied .icon { font-size: 64px; }
+  .access-denied h2 { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--black); }
+  .access-denied p { font-size: 15px; color: var(--gray); }
+  .access-denied a { color: var(--green); font-weight: 500; text-decoration: none; margin-top: 8px; display: inline-block; }
+
+  /* ── LOADING ── */
+  .loading-screen {
+    position: fixed; inset: 0; background: var(--off-white);
+    display: flex; align-items: center; justify-content: center; z-index: 998;
+  }
+  .loading-screen .logo { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--green); }
+  .dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin: 0 3px; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-w); background: var(--black); height: 100vh; position: fixed; left:0; top:0; display: flex; flex-direction: column; z-index: 50; }
+  .sidebar-logo { padding: 22px 22px 18px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .sidebar-logo .logo { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--green); }
+  .sidebar-logo .tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 16px 10px; overflow-y: auto; }
+  .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 0 10px; margin: 16px 0 5px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: var(--green); color: white; font-weight: 500; }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 100px; }
+  .nav-item.active .nav-badge { background: rgba(255,255,255,0.3); }
+  .sidebar-bottom { padding: 14px 10px 18px; border-top: 1px solid rgba(255,255,255,0.07); }
+  .admin-profile { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background 0.15s; }
+  .admin-profile:hover { background: rgba(255,255,255,0.06); }
+  .admin-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #00C853); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; overflow: hidden; }
+  .admin-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .admin-name { font-size: 13px; font-weight: 600; color: white; }
+  .admin-role { font-size: 10px; color: var(--green); margin-top: 1px; }
+  .btn-logout { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; color: rgba(255,255,255,0.35); font-size: 12px; cursor: pointer; border: none; background: none; width: 100%; margin-top: 4px; transition: all 0.15s; }
+  .btn-logout:hover { background: rgba(255,0,0,0.1); color: #ff6b6b; }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .topbar { background: white; padding: 13px 32px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--gray-light); position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; flex: 1; }
+  .content { padding: 28px 32px; flex: 1; }
+  .view { display: none; } .view.active { display: block; }
+
+  /* ── BOTÕES ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 100px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.18s; border: none; text-decoration: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+  .btn-outline:hover { background: var(--green-light); }
+  .btn-danger { background: var(--red-light); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  /* ── PAGE HEADER ── */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .page-header h2 { font-family: var(--font-display); font-size: 22px; font-weight: 800; }
+  .page-header p { font-size: 13px; color: var(--gray); margin-top: 3px; }
+
+  /* ── STAT CARDS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; border-radius: 14px; padding: 20px 22px; border: 1px solid var(--gray-light); transition: all 0.2s; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .stat-icon.green { background: var(--green-light); }
+  .stat-icon.blue { background: var(--blue-light); }
+  .stat-icon.yellow { background: var(--yellow-light); }
+  .stat-icon.red { background: var(--red-light); }
+  .stat-number { font-family: var(--font-display); font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+  .stat-label { font-size: 12px; color: var(--gray); }
+
+  /* ── CARD ── */
+  .card { background: white; border-radius: 14px; border: 1px solid var(--gray-light); overflow: hidden; margin-bottom: 24px; }
+  .card-header { padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-light); }
+  .card-header h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 11px 18px; text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); background: var(--off-white); border-bottom: 1px solid var(--gray-light); }
+  tbody tr { border-bottom: 1px solid var(--gray-light); transition: background 0.15s; }
+  tbody tr:hover { background: var(--off-white); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 13px 18px; font-size: 13px; vertical-align: middle; }
+  .td-user { display: flex; align-items: center; gap: 10px; }
+  .td-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; overflow: hidden; }
+  .td-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .td-name { font-weight: 500; }
+  .td-sub { font-size: 11px; color: var(--gray); margin-top: 1px; }
+  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 600; }
+  .badge.green { background: var(--green-light); color: var(--green-dark); }
+  .badge.yellow { background: var(--yellow-light); color: #7a5100; }
+  .badge.red { background: var(--red-light); color: var(--red); }
+  .badge.blue { background: var(--blue-light); color: var(--blue); }
+  .badge.gray { background: var(--gray-light); color: var(--gray-dark); }
+  .prog-mini { display: flex; align-items: center; gap: 8px; }
+  .prog-bar-mini { flex: 1; height: 5px; background: var(--gray-light); border-radius: 100px; overflow: hidden; min-width: 60px; }
+  .prog-fill-mini { height: 100%; background: linear-gradient(90deg, var(--green), #00C853); border-radius: 100px; }
+  .action-btns { display: flex; gap: 6px; }
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--gray-light); font-size: 12px; color: var(--gray); }
+
+  /* ── FORM ── */
+  .form-section { background: white; border-radius: 14px; border: 1px solid var(--gray-light); padding: 24px; margin-bottom: 20px; }
+  .form-section h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-light); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1/-1; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--gray-dark); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--gray-light);
+    font-family: var(--font-body); font-size: 13px; color: var(--black); outline: none;
+    background: white; transition: border-color 0.18s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+
+  /* ── MÓDULOS ── */
+  .modules-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .module-item { background: var(--off-white); border: 1px solid var(--gray-light); border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .module-num { width: 26px; height: 26px; border-radius: 8px; background: var(--green-light); color: var(--green-dark); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .module-item input { flex: 1; border: none; background: transparent; font-family: var(--font-body); font-size: 13px; color: var(--black); outline: none; }
+  .module-remove { background: none; border: none; color: var(--gray); cursor: pointer; font-size: 16px; transition: color 0.15s; }
+  .module-remove:hover { color: var(--red); }
+
+  /* ── ALERT ── */
+  .alert { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }
+  .alert.success { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
+  .alert.error { background: var(--red-light); color: var(--red); border: 1px solid #ffcdd2; }
+  .alert.warning { background: var(--yellow-light); color: #7a5100; border: 1px solid #ffe082; }
+  .alert.info { background: var(--blue-light); color: var(--blue); border: 1px solid #90caf9; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 48px; color: var(--gray); }
+  .empty .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* ── CERT CARD ── */
+  .cert-preview { background: white; border: 2px solid var(--green-mid); border-radius: 16px; padding: 32px; max-width: 500px; margin: 0 auto; text-align: center; }
+  .cert-preview .cert-logo { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--green); margin-bottom: 16px; }
+  .cert-preview .cert-divider { width: 50px; height: 3px; background: var(--green); border-radius: 2px; margin: 16px auto; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-screen" id="loading-screen">
+  <div style="text-align:center;">
+    <div class="logo">SER+</div>
+    <div style="margin-top:16px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+</div>
+
+<!-- Acesso negado -->
+<div class="access-denied" id="access-denied" style="display:none;">
+  <div class="icon">🔒</div>
+  <h2>Acesso restrito</h2>
+  <p>Esta área é exclusiva para administradores da SER+.</p>
+  <a href="dashboard.html">← Voltar para minha área</a>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" style="display:none;">
+  <div class="sidebar-logo">
+    <div class="logo">SER+</div>
+    <div class="tag">Painel Admin</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Visão Geral</div>
+    <button class="nav-item active" onclick="showView('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
+    <div class="nav-label">Conteúdo</div>
+    <button class="nav-item" onclick="showView('novo-curso',this)"><span class="icon">➕</span> Novo Curso</button>
+    <button class="nav-item" onclick="showView('cursos',this)"><span class="icon">📚</span> Gerenciar Cursos</button>
+    <div class="nav-label">Comunidade</div>
+    <button class="nav-item" onclick="showView('alunos',this)"><span class="icon">👥</span> Alunos <span class="nav-badge" id="badge-novos" style="display:none">!</span></button>
+    <button class="nav-item" onclick="showView('certificados',this)"><span class="icon">🎓</span> Certificados</button>
+    <div class="nav-label">Sistema</div>
+    <button class="nav-item" onclick="window.location.href='dashboard.html'"><span class="icon">🏠</span> Ver plataforma</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-profile">
+      <div class="admin-avatar" id="admin-avatar">👤</div>
+      <div>
+        <div class="admin-name" id="admin-name">Admin</div>
+        <div class="admin-role">Administrador</div>
+      </div>
+    </div>
+    <button class="btn-logout" id="btn-logout"><span>🚪</span> Sair</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main-content" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <a href="dashboard.html" class="btn btn-outline btn-sm">← Ver plataforma</a>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="page-header">
+        <div><h2>Visão Geral</h2><p id="dash-date"></p></div>
+        <button class="btn btn-primary" onclick="showView('novo-curso', document.querySelectorAll('.nav-item')[1])">+ Novo Curso</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon green">👥</div></div>
+          <div class="stat-number" id="stat-alunos">—</div>
+          <div class="stat-label">Alunos cadastrados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon blue">📚</div></div>
+          <div class="stat-number" id="stat-cursos">—</div>
+          <div class="stat-label">Cursos publicados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon yellow">🎓</div></div>
+          <div class="stat-number" id="stat-certs">—</div>
+          <div class="stat-label">Certificados emitidos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon red">📅</div></div>
+          <div class="stat-number" id="stat-hoje">—</div>
+          <div class="stat-label">Novos alunos hoje</div>
+        </div>
+      </div>
+
+      <!-- Alunos recentes -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Alunos recentes</h3>
+          <button class="btn btn-outline btn-sm" onclick="showView('alunos', document.querySelectorAll('.nav-item')[4])">Ver todos →</button>
+        </div>
+        <table>
+          <thead><tr><th>Aluno</th><th>E-mail</th><th>Cadastro</th><th>Status</th></tr></thead>
+          <tbody id="dash-alunos-table">
+            <tr><td colspan="4"><div class="empty"><div class="icon">⏳</div><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cursos cadastrados -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Cursos cadastrados</h3>
+          <button class="btn btn-outline btn-sm" onclick="showView('cursos', document.querySelectorAll('.nav-item')[2])">Ver todos →</button>
+        </div>
+        <table>
+          <thead><tr><th>Curso</th><th>Categoria</th><th>Módulos</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="dash-cursos-table">
+            <tr><td colspan="5"><div class="empty"><div class="icon">⏳</div><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ NOVO CURSO ══ -->
+    <div class="view" id="view-novo-curso">
+      <div class="page-header">
+        <div><h2>Novo Curso</h2><p>Preencha as informações e publique um novo curso.</p></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-outline" onclick="salvarCurso('rascunho')">Salvar rascunho</button>
+          <button class="btn btn-primary" onclick="salvarCurso('publicado')">Publicar curso</button>
+        </div>
+      </div>
+
+      <div id="form-alert"></div>
+
+      <div class="form-section">
+        <h3>Informações gerais</h3>
+        <div class="form-grid">
+          <div class="form-group full"><label>Título do curso *</label><input type="text" id="curso-titulo" placeholder="Ex: Inteligência Emocional na Prática"></div>
+          <div class="form-group full"><label>Descrição *</label><textarea id="curso-desc" placeholder="Descreva o que o aluno vai aprender..."></textarea></div>
+          <div class="form-group">
+            <label>Categoria *</label>
+            <select id="curso-cat">
+              <option value="">Selecione...</option>
+              <option>Desenvolvimento Pessoal</option>
+              <option>Carreira</option>
+              <option>Comunicação</option>
+              <option>Saúde e Bem-estar</option>
+              <option>Empreendedorismo</option>
+              <option>Liderança</option>
+              <option>Educação Financeira</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nível</label>
+            <select id="curso-nivel">
+              <option>Iniciante</option><option>Intermediário</option><option>Avançado</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Carga horária estimada</label><input type="text" id="curso-carga" placeholder="Ex: 4h 30min"></div>
+          <div class="form-group"><label>Emoji do curso</label><input type="text" id="curso-emoji" placeholder="Ex: 🧠" maxlength="4"></div>
+          <div class="form-group full"><label>Link da thumbnail (imagem de capa)</label><input type="url" id="curso-thumb" placeholder="https://..."></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Módulos do curso</h3>
+        <div class="modules-list" id="modulos-list">
+          <div class="module-item">
+            <div class="module-num">1</div>
+            <input type="text" placeholder="Nome do módulo..." class="modulo-input">
+            <button class="module-remove" onclick="removerModulo(this)">×</button>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="adicionarModulo()">+ Adicionar módulo</button>
+      </div>
+
+      <div class="form-section">
+        <h3>Vídeos (YouTube)</h3>
+        <div class="alert info">ℹ️ Cole os links dos vídeos do YouTube (não listados) para cada módulo. Os alunos verão o player direto na plataforma.</div>
+        <div id="videos-list">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>Link do vídeo — Módulo 1</label>
+            <input type="url" class="video-input" placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GERENCIAR CURSOS ══ -->
+    <div class="view" id="view-cursos">
+      <div class="page-header">
+        <div><h2>Gerenciar Cursos</h2><p id="cursos-count">Carregando...</p></div>
+        <button class="btn btn-primary" onclick="showView('novo-curso', document.querySelectorAll('.nav-item')[1])">+ Novo Curso</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Todos os cursos</h3></div>
+        <table>
+          <thead><tr><th>Curso</th><th>Categoria</th><th>Módulos</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="cursos-table">
+            <tr><td colspan="5"><div class="empty"><div class="icon">⏳</div><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ ALUNOS ══ -->
+    <div class="view" id="view-alunos">
+      <div class="page-header">
+        <div><h2>Alunos</h2><p id="alunos-count">Carregando...</p></div>
+        <button class="btn btn-outline" onclick="exportarCSV()">⬇ Exportar CSV</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Todos os alunos</h3>
+          <input type="text" placeholder="🔍 Buscar aluno..." id="busca-aluno" oninput="filtrarAlunos()" style="padding:8px 14px;border-radius:100px;border:1.5px solid var(--gray-light);font-family:var(--font-body);font-size:13px;outline:none;width:220px;">
+        </div>
+        <table>
+          <thead><tr><th>Aluno</th><th>E-mail</th><th>Nível</th><th>XP</th><th>Certificados</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody id="alunos-table">
+            <tr><td colspan="7"><div class="empty"><div class="icon">⏳</div><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><span id="alunos-pag-info"></span></div>
+      </div>
+    </div>
+
+    <!-- ══ CERTIFICADOS ══ -->
+    <div class="view" id="view-certificados">
+      <div class="page-header">
+        <div><h2>Certificados</h2><p id="certs-count">Carregando...</p></div>
+      </div>
+
+      <!-- Emitir certificado manual -->
+      <div class="form-section" style="margin-bottom:24px;">
+        <h3>Emitir certificado manualmente</h3>
+        <div class="alert info">ℹ️ Os certificados também são emitidos automaticamente quando um aluno conclui 100% de um curso.</div>
+        <div class="form-grid">
+          <div class="form-group"><label>UID ou e-mail do aluno</label><input type="text" id="cert-aluno" placeholder="E-mail do aluno"></div>
+          <div class="form-group">
+            <label>Curso</label>
+            <select id="cert-curso"><option value="">Selecione o curso...</option></select>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="emitirCertificado()">Emitir certificado</button>
+        </div>
+        <div id="cert-alert" style="margin-top:14px;"></div>
+      </div>
+
+      <!-- Lista de certificados -->
+      <div class="card">
+        <div class="card-header"><h3>Certificados emitidos</h3></div>
+        <table>
+          <thead><tr><th>Aluno</th><th>Curso</th><th>Data</th><th>ID</th><th>Ações</th></tr></thead>
+          <tbody id="certs-table">
+            <tr><td colspan="5"><div class="empty"><div class="icon">⏳</div><p>Carregando...</p></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><span id="certs-pag-info"></span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc,
+  query, orderBy, limit, serverTimestamp, where, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
+  authDomain: "ser-mais-7d338.firebaseapp.com",
+  projectId: "ser-mais-7d338",
+  storageBucket: "ser-mais-7d338.firebasestorage.app",
+  messagingSenderId: "974915147883",
+  appId: "1:974915147883:web:b3c197a41bbf60033d392e",
+  measurementId: "G-JPM0YRW37Q"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── SEU E-MAIL DE ADMIN ──────────────────────────────────
+// Troque pelo seu e-mail real do Google
+const ADMIN_EMAIL = "SEU_EMAIL_AQUI@gmail.com";
+// ─────────────────────────────────────────────────────────
+
+let todosAlunos = [];
+let todosCursos = [];
+
+// Data
+const days = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const now = new Date();
+const dateStr = `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]}`;
+document.getElementById('dash-date').textContent = dateStr;
+
+// ── AUTENTICAÇÃO ─────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+
+  // Verifica se é admin
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  const isAdmin = user.email === ADMIN_EMAIL ||
+    (userDoc.exists() && userDoc.data().role === 'admin');
+
+  document.getElementById('loading-screen').style.display = 'none';
+
+  if (!isAdmin) {
+    document.getElementById('access-denied').style.display = 'flex';
+    return;
+  }
+
+  // Mostra o painel
+  document.getElementById('sidebar').style.display = 'flex';
+  document.getElementById('main-content').style.display = 'flex';
+
+  // Preenche admin
+  document.getElementById('admin-name').textContent = user.displayName || user.email;
+  if (user.photoURL) {
+    document.getElementById('admin-avatar').innerHTML = `<img src="${user.photoURL}">`;
+  }
+
+  // Carrega dados
+  carregarDashboard();
+  carregarAlunos();
+  carregarCursos();
+  carregarCertificados();
+});
+
+// ── DASHBOARD ────────────────────────────────────────────
+async function carregarDashboard() {
+  try {
+    // Total alunos
+    const alunosSnap = await getDocs(collection(db, 'users'));
+    document.getElementById('stat-alunos').textContent = alunosSnap.size;
+
+    // Alunos hoje
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    let hoje_count = 0;
+    const rows = [];
+    alunosSnap.forEach(d => {
+      const data = d.data();
+      if (data.criadoEm?.toDate() >= hoje) hoje_count++;
+      rows.push(data);
+    });
+    rows.sort((a,b) => (b.criadoEm?.seconds||0) - (a.criadoEm?.seconds||0));
+    document.getElementById('stat-hoje').textContent = hoje_count;
+
+    // Alunos recentes na tabela
+    const tbody = document.getElementById('dash-alunos-table');
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="icon">👥</div><p>Nenhum aluno cadastrado ainda.</p></div></td></tr>`;
+    } else {
+      tbody.innerHTML = rows.slice(0,5).map(a => `
+        <tr>
+          <td><div class="td-user">
+            ${a.foto ? `<div class="td-avatar"><img src="${a.foto}"></div>` : `<div class="td-avatar">👤</div>`}
+            <div class="td-name">${a.nome || '—'}</div>
+          </div></td>
+          <td style="color:var(--gray)">${a.email || '—'}</td>
+          <td style="color:var(--gray);font-size:12px">${a.criadoEm ? formatarData(a.criadoEm.toDate()) : '—'}</td>
+          <td><span class="badge green">Ativo</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // Cursos
+    const cursosSnap = await getDocs(collection(db, 'courses'));
+    document.getElementById('stat-cursos').textContent = cursosSnap.size;
+    const cursos = [];
+    cursosSnap.forEach(d => cursos.push({ id: d.id, ...d.data() }));
+    const ctbody = document.getElementById('dash-cursos-table');
+    if (cursos.length === 0) {
+      ctbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="icon">📚</div><p>Nenhum curso cadastrado ainda.</p></div></td></tr>`;
+    } else {
+      ctbody.innerHTML = cursos.map(c => `
+        <tr>
+          <td><div class="td-user">
+            <div class="td-avatar" style="background:var(--green-light);font-size:16px;">${c.emoji||'📚'}</div>
+            <div><div class="td-name">${c.titulo}</div><div class="td-sub">${c.cargaHoraria||''}</div></div>
+          </div></td>
+          <td><span class="badge gray">${c.categoria||'—'}</span></td>
+          <td>${c.modulos?.length||0} módulos</td>
+          <td><span class="badge ${c.status==='publicado'?'green':c.status==='rascunho'?'yellow':'gray'}">${c.status||'—'}</span></td>
+          <td><div class="action-btns">
+            <button class="btn btn-danger btn-sm" onclick="deletarCurso('${c.id}')">🗑</button>
+          </div></td>
+        </tr>
+      `).join('');
+    }
+
+    // Certs
+    const certsSnap = await getDocs(collection(db, 'certificates'));
+    document.getElementById('stat-certs').textContent = certsSnap.size;
+
+  } catch(e) { console.error('Erro dashboard', e); }
+}
+
+// ── SALVAR CURSO ─────────────────────────────────────────
+window.salvarCurso = async (status) => {
+  const titulo = document.getElementById('curso-titulo').value.trim();
+  const desc = document.getElementById('curso-desc').value.trim();
+  const cat = document.getElementById('curso-cat').value;
+  if (!titulo || !desc || !cat) {
+    mostrarAlerta('form-alert', 'error', '⚠️ Preencha título, descrição e categoria.');
+    return;
+  }
+
+  const modulos = Array.from(document.querySelectorAll('.modulo-input'))
+    .map(i => i.value.trim()).filter(Boolean);
+  const videos = Array.from(document.querySelectorAll('.video-input'))
+    .map(i => i.value.trim());
+
+  try {
+    const ref = await addDoc(collection(db, 'courses'), {
+      titulo,
+      descricao: desc,
+      categoria: cat,
+      nivel: document.getElementById('curso-nivel').value,
+      cargaHoraria: document.getElementById('curso-carga').value,
+      emoji: document.getElementById('curso-emoji').value || '📚',
+      thumbnail: document.getElementById('curso-thumb').value,
+      modulos,
+      videos,
+      status,
+      criadoEm: serverTimestamp()
+    });
+    mostrarAlerta('form-alert', 'success', `✅ Curso ${status === 'publicado' ? 'publicado' : 'salvo como rascunho'} com sucesso!`);
+    limparFormCurso();
+    carregarCursos();
+    carregarDashboard();
+  } catch(e) {
+    mostrarAlerta('form-alert', 'error', '❌ Erro ao salvar curso. Tente novamente.');
+    console.error(e);
+  }
+};
+
+function limparFormCurso() {
+  ['curso-titulo','curso-desc','curso-carga','curso-emoji','curso-thumb'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('curso-cat').value = '';
+  document.getElementById('modulos-list').innerHTML = `
+    <div class="module-item">
+      <div class="module-num">1</div>
+      <input type="text" placeholder="Nome do módulo..." class="modulo-input">
+      <button class="module-remove" onclick="removerModulo(this)">×</button>
+    </div>`;
+  document.getElementById('videos-list').innerHTML = `
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Link do vídeo — Módulo 1</label>
+      <input type="url" class="video-input" placeholder="https://www.youtube.com/watch?v=...">
+    </div>`;
+}
+
+// ── MÓDULOS ───────────────────────────────────────────────
+window.adicionarModulo = () => {
+  const list = document.getElementById('modulos-list');
+  const num = list.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'module-item';
+  div.innerHTML = `<div class="module-num">${num}</div><input type="text" placeholder="Nome do módulo..." class="modulo-input"><button class="module-remove" onclick="removerModulo(this)">×</button>`;
+  list.appendChild(div);
+  // Adiciona campo de vídeo
+  const vlist = document.getElementById('videos-list');
+  const vdiv = document.createElement('div');
+  vdiv.className = 'form-group';
+  vdiv.style.marginBottom = '12px';
+  vdiv.innerHTML = `<label>Link do vídeo — Módulo ${num}</label><input type="url" class="video-input" placeholder="https://www.youtube.com/watch?v=...">`;
+  vlist.appendChild(vdiv);
+};
+
+window.removerModulo = (btn) => {
+  const list = document.getElementById('modulos-list');
+  if (list.children.length <= 1) return;
+  btn.parentElement.remove();
+  // Renumera
+  Array.from(list.children).forEach((item, i) => {
+    item.querySelector('.module-num').textContent = i + 1;
+  });
+};
+
+// ── CARREGAR CURSOS ───────────────────────────────────────
+async function carregarCursos() {
+  try {
+    const snap = await getDocs(collection(db, 'courses'));
+    todosCursos = [];
+    snap.forEach(d => todosCursos.push({ id: d.id, ...d.data() }));
+    document.getElementById('cursos-count').textContent = `${todosCursos.length} curso(s) cadastrado(s)`;
+
+    // Select de cursos para certificados
+    const sel = document.getElementById('cert-curso');
+    sel.innerHTML = '<option value="">Selecione o curso...</option>' +
+      todosCursos.map(c => `<option value="${c.id}">${c.titulo}</option>`).join('');
+
+    const tbody = document.getElementById('cursos-table');
+    if (todosCursos.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="icon">📚</div><p>Nenhum curso ainda. <a href="#" onclick="showView('novo-curso')">Criar primeiro curso →</a></p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = todosCursos.map(c => `
+      <tr>
+        <td><div class="td-user">
+          <div class="td-avatar" style="background:var(--green-light);font-size:16px;">${c.emoji||'📚'}</div>
+          <div><div class="td-name">${c.titulo}</div><div class="td-sub">${c.cargaHoraria||''}</div></div>
+        </div></td>
+        <td><span class="badge gray">${c.categoria||'—'}</span></td>
+        <td>${c.modulos?.length||0} módulos</td>
+        <td><span class="badge ${c.status==='publicado'?'green':c.status==='rascunho'?'yellow':'gray'}">${c.status||'—'}</span></td>
+        <td><div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="alternarStatus('${c.id}','${c.status}')">${c.status==='publicado'?'Despublicar':'Publicar'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarCurso('${c.id}')">🗑</button>
+        </div></td>
+      </tr>
+    `).join('');
+  } catch(e) { console.error('Erro cursos', e); }
+}
+
+window.deletarCurso = async (id) => {
+  if (!confirm('Tem certeza que quer deletar este curso?')) return;
+  await deleteDoc(doc(db, 'courses', id));
+  carregarCursos(); carregarDashboard();
+};
+
+window.alternarStatus = async (id, status) => {
+  const novo = status === 'publicado' ? 'rascunho' : 'publicado';
+  await updateDoc(doc(db, 'courses', id), { status: novo });
+  carregarCursos(); carregarDashboard();
+};
+
+// ── CARREGAR ALUNOS ───────────────────────────────────────
+async function carregarAlunos() {
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    todosAlunos = [];
+    snap.forEach(d => todosAlunos.push({ id: d.id, ...d.data() }));
+    todosAlunos.sort((a,b) => (b.criadoEm?.seconds||0) - (a.criadoEm?.seconds||0));
+    document.getElementById('alunos-count').textContent = `${todosAlunos.length} aluno(s) cadastrado(s)`;
+    renderAlunos(todosAlunos);
+  } catch(e) { console.error('Erro alunos', e); }
+}
+
+function renderAlunos(lista) {
+  const tbody = document.getElementById('alunos-table');
+  document.getElementById('alunos-pag-info').textContent = `${lista.length} aluno(s)`;
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="icon">👥</div><p>Nenhum aluno encontrado.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = lista.map(a => `
+    <tr>
+      <td><div class="td-user">
+        ${a.foto ? `<div class="td-avatar"><img src="${a.foto}"></div>` : `<div class="td-avatar">👤</div>`}
+        <div class="td-name">${a.nome||'—'}</div>
+      </div></td>
+      <td style="color:var(--gray)">${a.email||'—'}</td>
+      <td>Nível ${a.nivel||1}</td>
+      <td>${a.xp||0} XP</td>
+      <td>${a.certificados||0} 🎓</td>
+      <td style="color:var(--gray);font-size:12px">${a.criadoEm ? formatarData(a.criadoEm.toDate()) : '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removerAluno('${a.id}')">🚫</button></td>
+    </tr>
+  `).join('');
+}
+
+window.filtrarAlunos = () => {
+  const busca = document.getElementById('busca-aluno').value.toLowerCase();
+  const filtrado = todosAlunos.filter(a =>
+    (a.nome||'').toLowerCase().includes(busca) ||
+    (a.email||'').toLowerCase().includes(busca)
+  );
+  renderAlunos(filtrado);
+};
+
+window.removerAluno = async (id) => {
+  if (!confirm('Remover este aluno da plataforma?')) return;
+  await deleteDoc(doc(db, 'users', id));
+  carregarAlunos(); carregarDashboard();
+};
+
+window.exportarCSV = () => {
+  const header = 'Nome,Email,Nivel,XP,Certificados,Cadastro\n';
+  const rows = todosAlunos.map(a =>
+    `"${a.nome||''}","${a.email||''}","${a.nivel||1}","${a.xp||0}","${a.certificados||0}","${a.criadoEm ? formatarData(a.criadoEm.toDate()) : ''}"`
+  ).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'alunos-ser-mais.csv'; a.click();
+};
+
+// ── CERTIFICADOS ──────────────────────────────────────────
+async function carregarCertificados() {
+  try {
+    const snap = await getDocs(collection(db, 'certificates'));
+    const certs = [];
+    snap.forEach(d => certs.push({ id: d.id, ...d.data() }));
+    certs.sort((a,b) => (b.emitidoEm?.seconds||0) - (a.emitidoEm?.seconds||0));
+    document.getElementById('certs-count').textContent = `${certs.length} certificado(s) emitido(s)`;
+    document.getElementById('certs-pag-info').textContent = `${certs.length} certificado(s)`;
+    const tbody = document.getElementById('certs-table');
+    if (certs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="icon">🎓</div><p>Nenhum certificado emitido ainda.</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = certs.map(c => `
+      <tr>
+        <td><div class="td-name">${c.alunoNome||c.alunoEmail||'—'}</div></td>
+        <td style="font-size:13px">${c.cursoTitulo||'—'}</td>
+        <td style="color:var(--gray);font-size:12px">${c.emitidoEm ? formatarData(c.emitidoEm.toDate()) : '—'}</td>
+        <td style="font-family:monospace;font-size:11px;color:var(--gray)">${c.id.substring(0,12).toUpperCase()}</td>
+        <td><div class="action-btns">
+          <button class="btn btn-danger btn-sm" onclick="revogarCert('${c.id}')">Revogar</button>
+        </div></td>
+      </tr>
+    `).join('');
+  } catch(e) { console.error('Erro certs', e); }
+}
+
+window.emitirCertificado = async () => {
+  const email = document.getElementById('cert-aluno').value.trim();
+  const cursoId = document.getElementById('cert-curso').value;
+  if (!email || !cursoId) {
+    mostrarAlerta('cert-alert', 'error', '⚠️ Preencha o e-mail do aluno e selecione o curso.');
+    return;
+  }
+  // Busca aluno pelo e-mail
+  const q = query(collection(db, 'users'), where('email', '==', email));
+  const snap = await getDocs(q);
+  if (snap.empty) {
+    mostrarAlerta('cert-alert', 'error', '❌ Aluno não encontrado com este e-mail.');
+    return;
+  }
+  const aluno = { id: snap.docs[0].id, ...snap.docs[0].data() };
+  const curso = todosCursos.find(c => c.id === cursoId);
+  try {
+    await addDoc(collection(db, 'certificates'), {
+      alunoId: aluno.id,
+      alunoNome: aluno.nome || '',
+      alunoEmail: aluno.email,
+      cursoId,
+      cursoTitulo: curso?.titulo || '',
+      emitidoEm: serverTimestamp()
+    });
+    // Atualiza contador de certs do aluno
+    await updateDoc(doc(db, 'users', aluno.id), {
+      certificados: (aluno.certificados || 0) + 1
+    });
+    mostrarAlerta('cert-alert', 'success', `✅ Certificado emitido para ${aluno.nome || email}!`);
+    document.getElementById('cert-aluno').value = '';
+    document.getElementById('cert-curso').value = '';
+    carregarCertificados(); carregarDashboard();
+  } catch(e) {
+    mostrarAlerta('cert-alert', 'error', '❌ Erro ao emitir certificado.');
+    console.error(e);
+  }
+};
+
+window.revogarCert = async (id) => {
+  if (!confirm('Revogar este certificado?')) return;
+  await deleteDoc(doc(db, 'certificates', id));
+  carregarCertificados(); carregarDashboard();
+};
+
+// ── UTILITÁRIOS ───────────────────────────────────────────
+function formatarData(date) {
+  return date.toLocaleDateString('pt-BR');
+}
+
+function mostrarAlerta(containerId, tipo, msg) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = `<div class="alert ${tipo}">${msg}</div>`;
+  setTimeout(() => el.innerHTML = '', 4000);
+}
+
+// ── LOGOUT ────────────────────────────────────────────────
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.href = 'login.html';
+});
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────
+window.showView = (name, btn) => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const t = document.getElementById('view-' + name);
+  if (t) t.classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  const titles = { dashboard:'Dashboard', 'novo-curso':'Novo Curso', cursos:'Gerenciar Cursos', alunos:'Alunos', certificados:'Certificados' };
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+};
+</script>
+
+</body>
+</html>
