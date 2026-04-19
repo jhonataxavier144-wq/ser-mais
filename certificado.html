@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SER+ | Certificado</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --green: #009C3B;
+    --green-dark: #007A2E;
+    --green-light: #E8F8EE;
+    --black: #1A2620;
+    --gray: #6B7F76;
+    --off-white: #F7FAF8;
+    --font-serif: 'EB Garamond', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-display: 'Baloo 2', cursive;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: #e8e8e8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── TOPO DA PÁGINA ── */
+  .page-top {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .page-top .logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green);
+    text-decoration: none;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 24px; border-radius: 100px;
+    font-family: var(--font-body); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; border: none;
+  }
+  .btn-primary { background: var(--green); color: white; box-shadow: 0 4px 16px rgba(0,156,59,0.25); }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+  .btn-outline { background: white; color: var(--green); border: 1.5px solid var(--green); }
+  .btn-outline:hover { background: var(--green-light); }
+  .btn-share { background: #1877F2; color: white; }
+  .btn-share:hover { background: #1558c0; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ── LOADING ── */
+  #loading {
+    position: fixed; inset: 0; background: var(--off-white);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; flex-direction: column; gap: 12px;
+  }
+  #loading .logo { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--green); }
+  .dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin: 0 3px; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* ── CERTIFICADO ── */
+  #cert-container {
+    width: 960px;
+    background: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.18);
+  }
+
+  /* Fundo com padrão sutil (linhas onduladas como FGV) */
+  #cert-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 18px,
+        rgba(0,156,59,0.025) 18px,
+        rgba(0,156,59,0.025) 19px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Barra lateral esquerda verde */
+  .cert-left-bar {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 8px;
+    background: linear-gradient(180deg, #009C3B 0%, #00C853 50%, #FFDF00 100%);
+    z-index: 2;
+  }
+
+  /* Triângulo decorativo canto superior direito */
+  .cert-tri {
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 180px 180px 0;
+    border-color: transparent rgba(0,156,59,0.08) transparent transparent;
+    z-index: 1;
+  }
+
+  .cert-tri-2 {
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 120px 120px 0;
+    border-color: transparent rgba(0,156,59,0.06) transparent transparent;
+    z-index: 1;
+  }
+
+  /* Conteúdo */
+  .cert-content {
+    position: relative;
+    z-index: 3;
+    padding: 52px 72px 44px 80px;
+  }
+
+  /* Cabeçalho */
+  .cert-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #d8e8df;
+  }
+
+  .cert-logo-area .cert-logo {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--green);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .cert-logo-area .cert-subtitulo {
+    font-size: 11px;
+    color: var(--gray);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .cert-tipo {
+    text-align: right;
+  }
+
+  .cert-tipo .tipo-label {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--black);
+    letter-spacing: 1px;
+  }
+
+  .cert-tipo .tipo-sub {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* Corpo */
+  .cert-main {
+    margin-bottom: 40px;
+  }
+
+  .cert-intro {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--black);
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+
+  .cert-intro strong { font-weight: 700; }
+
+  .cert-nome {
+    font-family: var(--font-serif);
+    font-size: 46px;
+    font-weight: 700;
+    color: var(--black);
+    margin: 20px 0 20px;
+    line-height: 1.1;
+    border-bottom: 1px solid #d8e8df;
+    padding-bottom: 20px;
+  }
+
+  .cert-texto {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--black);
+    line-height: 1.8;
+    margin-bottom: 6px;
+  }
+
+  .cert-curso {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--black);
+    margin: 4px 0 16px;
+    font-style: italic;
+  }
+
+  .cert-detalhes {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    color: var(--black);
+    line-height: 1.8;
+  }
+
+  .cert-detalhes strong { font-weight: 700; }
+
+  .cert-local-data {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: var(--black);
+    margin-top: 24px;
+  }
+
+  /* Rodapé */
+  .cert-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid #d8e8df;
+    gap: 24px;
+  }
+
+  .cert-assinaturas {
+    display: flex;
+    gap: 52px;
+    align-items: flex-end;
+  }
+
+  .assinatura {
+    text-align: center;
+  }
+
+  .assinatura .linha {
+    width: 160px; height: 1px;
+    background: var(--black);
+    margin: 0 auto 8px;
+  }
+
+  .assinatura .nome {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  .assinatura .cargo {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 2px;
+  }
+
+  /* Selo */
+  .cert-selo {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green) 0%, #00C853 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+    box-shadow: 0 4px 16px rgba(0,156,59,0.3);
+    flex-shrink: 0;
+  }
+
+  /* QR Code */
+  .cert-qr-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  #qrcode canvas, #qrcode img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  .cert-qr-area .qr-label {
+    font-size: 9px;
+    color: var(--gray);
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    max-width: 80px;
+  }
+
+  /* Rodapé de validação */
+  .cert-validation-bar {
+    background: #f4f8f5;
+    border-top: 1px solid #d8e8df;
+    padding: 12px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 3;
+  }
+
+  .cert-validation-bar .val-id {
+    font-size: 10px;
+    color: var(--gray);
+    font-family: monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .cert-validation-bar .val-link {
+    font-size: 10px;
+    color: var(--green);
+    text-decoration: none;
+  }
+
+  /* ── PÁGINA DE VALIDAÇÃO ── */
+  #validation-page {
+    display: none;
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 20px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+  }
+
+  #validation-page .v-logo {
+    font-family: var(--font-display);
+    font-size: 28px; font-weight: 800; color: var(--green); margin-bottom: 24px;
+  }
+
+  #validation-page .v-icon { font-size: 56px; margin-bottom: 16px; }
+  #validation-page h2 { font-family: var(--font-display); font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  #validation-page p { color: var(--gray); font-size: 15px; line-height: 1.7; margin-bottom: 8px; }
+  #validation-page .v-nome { font-family: var(--font-serif); font-size: 28px; font-weight: 700; color: var(--black); margin: 16px 0 8px; }
+  #validation-page .v-curso { font-family: var(--font-serif); font-size: 18px; font-style: italic; color: var(--green); margin-bottom: 20px; }
+  #validation-page .v-detail { background: var(--off-white); border-radius: 12px; padding: 16px; margin: 8px 0; font-size: 14px; color: var(--black); }
+  #validation-page .v-detail span { color: var(--gray); font-size: 12px; display: block; margin-bottom: 2px; }
+
+  /* ── INVÁLIDO ── */
+  #invalid-page {
+    display: none;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    padding: 60px 40px;
+  }
+  #invalid-page .icon { font-size: 64px; margin-bottom: 16px; }
+  #invalid-page h2 { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+  #invalid-page p { color: var(--gray); font-size: 15px; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .page-top, .actions { display: none; }
+    #cert-container { box-shadow: none; }
+  }
+
+  @media (max-width: 980px) {
+    #cert-container { width: 100%; transform-origin: top left; }
+    body { padding: 20px 10px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="logo">SER+</div>
+  <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+</div>
+
+<!-- Topo -->
+<div class="page-top" id="page-top" style="display:none;">
+  <a href="dashboard.html" class="logo">← SER+</a>
+  <div class="actions">
+    <button class="btn btn-outline" onclick="compartilhar()">🔗 Compartilhar</button>
+    <button class="btn btn-primary" onclick="baixarPDF()">⬇ Baixar PDF</button>
+  </div>
+</div>
+
+<!-- Certificado -->
+<div id="cert-container" style="display:none;">
+  <div class="cert-left-bar"></div>
+  <div class="cert-tri"></div>
+  <div class="cert-tri-2"></div>
+
+  <div class="cert-content">
+    <!-- Cabeçalho -->
+    <div class="cert-header">
+      <div class="cert-logo-area">
+        <div class="cert-logo">SER+</div>
+        <div class="cert-subtitulo">Plataforma de Cursos</div>
+      </div>
+      <div class="cert-tipo">
+        <div class="tipo-label">CERTIFICADO</div>
+        <div class="tipo-sub">de Conclusão de Curso</div>
+      </div>
+    </div>
+
+    <!-- Corpo -->
+    <div class="cert-main">
+      <div class="cert-intro">
+        A Plataforma <strong>SER+</strong>, no uso de suas atribuições e tendo em vista
+        a conclusão do curso, confere o presente <strong>Certificado</strong> a
+      </div>
+
+      <div class="cert-nome" id="cert-nome">Nome do Aluno</div>
+
+      <div class="cert-texto">
+        que concluiu com êxito o curso
+      </div>
+
+      <div class="cert-curso" id="cert-curso-titulo">"Nome do Curso"</div>
+
+      <div class="cert-detalhes">
+        com carga horária de <strong id="cert-carga">—</strong>,
+        nível <strong id="cert-nivel">—</strong>,
+        na categoria <strong id="cert-categoria">—</strong>,
+        obtendo aprovação em todos os módulos e atividades propostas.
+      </div>
+
+      <div class="cert-local-data">
+        Rio de Janeiro, <span id="cert-data">—</span>.
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="cert-footer">
+      <div class="cert-assinaturas">
+        <div class="assinatura">
+          <div class="linha"></div>
+          <div class="nome">Coordenação SER+</div>
+          <div class="cargo">Coordenação Acadêmica</div>
+        </div>
+        <div class="assinatura">
+          <div class="linha"></div>
+          <div class="nome" id="cert-parceiro-nome">Direção</div>
+          <div class="cargo" id="cert-parceiro-cargo">Plataforma SER+</div>
+        </div>
+      </div>
+
+      <div class="cert-selo">🏅</div>
+
+      <div class="cert-qr-area">
+        <div id="qrcode"></div>
+        <div class="qr-label">Escaneie para validar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de validação -->
+  <div class="cert-validation-bar">
+    <div class="val-id">ID: <span id="cert-id">—</span> · Documento emitido eletronicamente pela Plataforma SER+</div>
+    <a class="val-link" id="cert-val-link" href="#">Validar certificado online</a>
+  </div>
+</div>
+
+<!-- Página de validação (quando acessar via QR) -->
+<div id="validation-page">
+  <div class="v-logo">SER+</div>
+  <div class="v-icon" id="v-icon">✅</div>
+  <h2 id="v-titulo">Certificado Válido</h2>
+  <p id="v-desc">Este certificado é autêntico e foi emitido pela Plataforma SER+.</p>
+  <div class="v-nome" id="v-nome"></div>
+  <div class="v-curso" id="v-curso"></div>
+  <div class="v-detail"><span>Carga horária</span><span id="v-carga"></span></div>
+  <div class="v-detail"><span>Data de emissão</span><span id="v-data"></span></div>
+  <div class="v-detail"><span>ID do certificado</span><span id="v-id" style="font-family:monospace;font-size:12px;"></span></div>
+</div>
+
+<!-- Inválido -->
+<div id="invalid-page">
+  <div class="icon">❌</div>
+  <h2>Certificado não encontrado</h2>
+  <p>Este certificado não existe ou foi revogado.<br>Entre em contato com a plataforma SER+.</p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
+    authDomain: "ser-mais-7d338.firebaseapp.com",
+    projectId: "ser-mais-7d338",
+    storageBucket: "ser-mais-7d338.firebasestorage.app",
+    messagingSenderId: "974915147883",
+    appId: "1:974915147833:web:b3c197a41bbf60033d392e",
+    measurementId: "G-JPM0YRW37Q"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const certId = params.get('id');
+  const validar = params.get('validar');
+
+  // ── MODO VALIDAÇÃO (via QR Code) ──
+  if (validar === '1' && certId) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('validation-page').style.display = 'block';
+    validarCertificado(certId);
+    async function validarCertificado(id) {
+      try {
+        const snap = await getDoc(doc(db, 'certificates', id));
+        if (!snap.exists()) {
+          document.getElementById('v-icon').textContent = '❌';
+          document.getElementById('v-titulo').textContent = 'Certificado não encontrado';
+          document.getElementById('v-desc').textContent = 'Este certificado não existe ou foi revogado.';
+          return;
+        }
+        const c = snap.data();
+        document.getElementById('v-nome').textContent = c.alunoNome || c.alunoEmail;
+        document.getElementById('v-curso').textContent = `"${c.cursoTitulo}"`;
+        document.getElementById('v-carga').textContent = c.cargaHoraria || '—';
+        document.getElementById('v-data').textContent = c.emitidoEm ? formatarData(c.emitidoEm.toDate()) : '—';
+        document.getElementById('v-id').textContent = id;
+      } catch(e) {
+        document.getElementById('v-icon').textContent = '⚠️';
+        document.getElementById('v-titulo').textContent = 'Erro ao validar';
+        document.getElementById('v-desc').textContent = 'Tente novamente em instantes.';
+      }
+    }
+    return;
+  }
+
+  // ── MODO CERTIFICADO NORMAL ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+
+    let certData = null;
+
+    if (certId) {
+      // Carrega certificado pelo ID
+      try {
+        const snap = await getDoc(doc(db, 'certificates', certId));
+        if (snap.exists()) certData = { id: snap.id, ...snap.data() };
+      } catch(e) {}
+    } else {
+      // Busca último certificado do aluno logado
+      try {
+        const q = query(collection(db, 'certificates'), where('alunoId', '==', user.uid));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const docs = [];
+          snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
+          docs.sort((a,b) => (b.emitidoEm?.seconds||0) - (a.emitidoEm?.seconds||0));
+          certData = docs[0];
+        }
+      } catch(e) {}
+    }
+
+    document.getElementById('loading').style.display = 'none';
+
+    if (!certData) {
+      document.getElementById('invalid-page').style.display = 'block';
+      return;
+    }
+
+    // Preenche certificado
+    const urlValidacao = `${window.location.origin}/certificado.html?id=${certData.id}&validar=1`;
+
+    document.getElementById('cert-nome').textContent = certData.alunoNome || certData.alunoEmail || user.displayName || '—';
+    document.getElementById('cert-curso-titulo').textContent = `"${certData.cursoTitulo || '—'}"`;
+    document.getElementById('cert-carga').textContent = certData.cargaHoraria || '—';
+    document.getElementById('cert-nivel').textContent = certData.nivel || 'Iniciante';
+    document.getElementById('cert-categoria').textContent = certData.categoria || '—';
+    document.getElementById('cert-id').textContent = certData.id.substring(0,20).toUpperCase();
+    document.getElementById('cert-val-link').href = urlValidacao;
+
+    // Parceiro
+    if (certData.parceiro) {
+      document.getElementById('cert-parceiro-nome').textContent = certData.parceiro;
+      document.getElementById('cert-parceiro-cargo').textContent = 'Instituição Parceira';
+    }
+
+    // Data formatada por extenso
+    const dataEmissao = certData.emitidoEm ? certData.emitidoEm.toDate() : new Date();
+    document.getElementById('cert-data').textContent = formatarDataExtenso(dataEmissao);
+
+    // Gera QR Code
+    new QRCode(document.getElementById('qrcode'), {
+      text: urlValidacao,
+      width: 72, height: 72,
+      colorDark: '#009C3B',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Mostra tudo
+    document.getElementById('cert-container').style.display = 'block';
+    document.getElementById('page-top').style.display = 'flex';
+
+    // Funções globais
+    window.baixarPDF = () => {
+      const el = document.getElementById('cert-container');
+      const nome = (certData.alunoNome || 'certificado').replace(/\s+/g, '-').toLowerCase();
+      html2pdf().set({
+        margin: 0,
+        filename: `certificado-ser-mais-${nome}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      }).from(el).save();
+    };
+
+    window.compartilhar = () => {
+      const url = `${window.location.origin}/certificado.html?id=${certData.id}`;
+      if (navigator.share) {
+        navigator.share({ title: 'Meu certificado SER+', url });
+      } else {
+        navigator.clipboard.writeText(url);
+        alert('Link copiado! ✅');
+      }
+    };
+  });
+
+  function formatarData(date) {
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function formatarDataExtenso(date) {
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+    return `${dias[date.getDay()]}, ${date.getDate()} de ${meses[date.getMonth()]} de ${date.getFullYear()}`;
+  }
+</script>
+
+</body>
+</html>
