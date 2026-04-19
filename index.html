@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SER+</title>
+<style>
+  body { margin: 0; background: #F7FAF8; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; }
+  .loading { text-align: center; color: #009C3B; }
+  .logo { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
+  .dot { display: inline-block; width: 10px; height: 10px; background: #009C3B; border-radius: 50%; margin: 0 4px; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+</style>
+</head>
+<body>
+<div class="loading">
+  <div class="logo">SER+</div>
+  <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
+    authDomain: "ser-mais-7d338.firebaseapp.com",
+    projectId: "ser-mais-7d338",
+    storageBucket: "ser-mais-7d338.firebasestorage.app",
+    messagingSenderId: "974915147883",
+    appId: "1:974915147883:web:b3c197a41bbf60033d392e"
+  });
+
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
+</body>
+</html>
