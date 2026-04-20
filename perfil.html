@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SER+ | Meu Perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #009C3B; --green-dark: #007A2E; --green-light: #E8F8EE;
+    --green-mid: #C5EDDA; --white: #FFFFFF; --off-white: #F7FAF8;
+    --gray-light: #F0F4F2; --gray: #8A9E94; --gray-dark: #3D4F46;
+    --black: #1A2620; --sidebar-w: 240px;
+    --font-display: 'Baloo 2', cursive; --font-body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--off-white); color: var(--black); display: flex; min-height: 100vh; }
+
+  /* ── LOADING ── */
+  #loading { position: fixed; inset: 0; background: var(--off-white); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 12px; }
+  #loading .logo { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--green); }
+  .dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin: 0 3px; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-w); background: var(--black); height: 100vh; position: fixed; left:0; top:0; display: flex; flex-direction: column; z-index: 50; }
+  .sidebar-logo { padding: 24px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .sidebar-logo a { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--green); text-decoration: none; }
+  .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
+  .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 0 10px; margin: 18px 0 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: rgba(255,255,255,0.5); font-size: 13.5px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+  .nav-item.active { background: var(--green); color: white; font-weight: 500; }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .sidebar-user { padding: 16px 20px 20px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #00C853); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; overflow: hidden; }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-name { font-size: 13px; font-weight: 600; color: white; }
+  .user-level { font-size: 11px; color: var(--green); margin-top: 2px; }
+  .btn-logout { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; color: rgba(255,255,255,0.35); font-size: 12px; cursor: pointer; border: none; background: none; width: 100%; margin-top: 4px; transition: all 0.15s; }
+  .btn-logout:hover { background: rgba(255,0,0,0.1); color: #ff6b6b; }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+  .topbar { background: white; padding: 14px 36px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--gray-light); position: sticky; top: 0; z-index: 40; }
+  .topbar h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; flex: 1; }
+  .content { padding: 32px 36px; flex: 1; }
+
+  /* ── PERFIL GRID ── */
+  .perfil-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ── CARD ── */
+  .card { background: white; border-radius: 16px; border: 1px solid var(--gray-light); overflow: hidden; }
+  .card-header { padding: 18px 22px; border-bottom: 1px solid var(--gray-light); display: flex; align-items: center; justify-content: space-between; }
+  .card-header h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+  .card-body { padding: 24px; }
+
+  /* ── FOTO E INFO ── */
+  .foto-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .foto-wrap {
+    position: relative;
+    width: 110px; height: 110px;
+    margin-bottom: 16px;
+  }
+
+  .foto-wrap .foto {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--green-mid);
+    background: var(--green-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+    overflow: hidden;
+  }
+
+  .foto-wrap .foto img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .foto-edit-btn {
+    position: absolute;
+    bottom: 4px; right: 4px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--green);
+    color: white;
+    border: 2px solid white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .foto-edit-btn:hover { background: var(--green-dark); transform: scale(1.1); }
+
+  .perfil-nome {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 800;
+    color: var(--black); margin-bottom: 4px;
+  }
+
+  .perfil-email { font-size: 13px; color: var(--gray); margin-bottom: 12px; }
+
+  .nivel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Stats rápidos */
+  .quick-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--gray-light);
+  }
+
+  .qs-item {
+    background: white;
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .qs-num {
+    font-family: var(--font-display);
+    font-size: 26px; font-weight: 800;
+    color: var(--green); line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .qs-label { font-size: 11px; color: var(--gray); }
+
+  /* ── FORMULÁRIO ── */
+  .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+  .form-group:last-child { margin-bottom: 0; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--gray-dark); letter-spacing: 0.3px; }
+  .form-group input, .form-group select {
+    padding: 11px 14px; border-radius: 10px;
+    border: 1.5px solid var(--gray-light);
+    font-family: var(--font-body); font-size: 14px; color: var(--black);
+    outline: none; background: white; transition: border-color 0.18s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+  .form-group input:disabled { background: var(--off-white); color: var(--gray); cursor: not-allowed; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ── BOTÕES ── */
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 22px; border-radius: 100px; font-family: var(--font-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.18s; border: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-outline { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+  .btn-outline:hover { background: var(--green-light); }
+
+  /* ── ALERT ── */
+  .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
+  .alert.success { background: var(--green-light); color: var(--green-dark); border: 1px solid var(--green-mid); }
+  .alert.error { background: #FFEBEE; color: #c62828; border: 1px solid #ffcdd2; }
+
+  /* ── CONQUISTAS ── */
+  .conquistas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .conq-card { background: white; border: 1px solid var(--gray-light); border-radius: 14px; padding: 16px 12px; text-align: center; transition: all 0.2s; }
+  .conq-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.07); }
+  .conq-card.locked { opacity: 0.35; filter: grayscale(1); }
+  .conq-icon { font-size: 28px; margin-bottom: 8px; }
+  .conq-nome { font-size: 12px; font-weight: 600; color: var(--black); line-height: 1.3; }
+  .conq-desc { font-size: 11px; color: var(--gray); margin-top: 3px; }
+
+  /* ── HISTÓRICO ── */
+  .historico-list { display: flex; flex-direction: column; gap: 10px; }
+  .hist-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; background: var(--off-white); border-radius: 12px; border: 1px solid var(--gray-light); transition: all 0.18s; }
+  .hist-item:hover { border-color: var(--green-mid); }
+  .hist-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .hist-info { flex: 1; }
+  .hist-info h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .hist-info p { font-size: 12px; color: var(--gray); }
+  .hist-prog { text-align: right; }
+  .hist-pct { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--green); line-height: 1; }
+  .hist-pct-label { font-size: 11px; color: var(--gray); }
+  .badge-cert { display: inline-flex; align-items: center; gap: 4px; background: var(--green-light); color: var(--green-dark); padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+
+  /* ── UPLOAD FOTO ── */
+  #foto-input { display: none; }
+
+  /* ── LOADING SPINNER ── */
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 900px) {
+    .perfil-grid { grid-template-columns: 1fr; }
+    .conquistas-grid { grid-template-columns: repeat(3,1fr); }
+    .sidebar { transform: translateX(-100%); }
+    .main { margin-left: 0; }
+    .content { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="logo">SER+</div>
+  <div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><a href="dashboard.html">SER+</a></div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Principal</div>
+    <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Início</a>
+    <a href="dashboard.html" class="nav-item"><span class="icon">📚</span> Meus Cursos</a>
+    <a href="dashboard.html" class="nav-item"><span class="icon">🎯</span> Catálogo</a>
+    <div class="nav-label">Progresso</div>
+    <a href="dashboard.html" class="nav-item"><span class="icon">🏆</span> Conquistas</a>
+    <a href="certificado.html" class="nav-item"><span class="icon">🎓</span> Certificados</a>
+    <div class="nav-label">Conta</div>
+    <a href="perfil.html" class="nav-item active"><span class="icon">👤</span> Meu Perfil</a>
+    <button class="btn-logout" id="btn-logout"><span>🚪</span> Sair</button>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">👤</div>
+    <div>
+      <div class="user-name" id="sidebar-nome">—</div>
+      <div class="user-level" id="sidebar-nivel">⭐ Nível 1</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <h1>Meu Perfil</h1>
+  </div>
+
+  <div class="content">
+    <div class="perfil-grid">
+
+      <!-- COLUNA ESQUERDA: foto + stats -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Card foto -->
+        <div class="card">
+          <div class="foto-area">
+            <div class="foto-wrap">
+              <div class="foto" id="foto-display">👤</div>
+              <label for="foto-input" class="foto-edit-btn" title="Alterar foto">✏️</label>
+              <input type="file" id="foto-input" accept="image/*">
+            </div>
+            <div class="perfil-nome" id="display-nome">—</div>
+            <div class="perfil-email" id="display-email">—</div>
+            <div class="nivel-badge" id="display-nivel">⭐ Nível 1 · 0 XP</div>
+          </div>
+
+          <!-- Stats rápidos -->
+          <div class="quick-stats">
+            <div class="qs-item">
+              <div class="qs-num" id="qs-certs">0</div>
+              <div class="qs-label">Certificados</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" id="qs-cursos">0</div>
+              <div class="qs-label">Cursos</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" id="qs-streak">0</div>
+              <div class="qs-label">Dias seguidos</div>
+            </div>
+            <div class="qs-item">
+              <div class="qs-num" id="qs-xp">0</div>
+              <div class="qs-label">XP total</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conquistas -->
+        <div class="card">
+          <div class="card-header"><h3>Conquistas</h3></div>
+          <div class="card-body">
+            <div class="conquistas-grid" id="conquistas-grid">
+              <!-- preenchido dinamicamente -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUNA DIREITA: formulário + histórico -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Editar perfil -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Editar Perfil</h3>
+          </div>
+          <div class="card-body">
+            <div id="form-alert"></div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nome completo *</label>
+                <input type="text" id="input-nome" placeholder="Seu nome completo">
+              </div>
+              <div class="form-group">
+                <label>Data de nascimento</label>
+                <input type="date" id="input-nascimento">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="input-email" disabled>
+              </div>
+              <div class="form-group">
+                <label>Gênero</label>
+                <select id="input-genero">
+                  <option value="">Prefiro não informar</option>
+                  <option value="feminino">Feminino</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="nao-binario">Não-binário</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cidade</label>
+                <input type="text" id="input-cidade" placeholder="Ex: Rio de Janeiro">
+              </div>
+              <div class="form-group">
+                <label>Estado</label>
+                <select id="input-estado">
+                  <option value="">Selecione...</option>
+                  <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                  <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                  <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                  <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                  <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                  <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                  <option>SP</option><option>SE</option><option>TO</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Como você ficou sabendo da SER+?</label>
+              <select id="input-origem">
+                <option value="">Selecione...</option>
+                <option value="indicacao">Indicação de amigo</option>
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="centro-academico">Centro Acadêmico</option>
+                <option value="projeto-social">Projeto Social</option>
+                <option value="google">Google / Pesquisa</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+              <button class="btn btn-primary" id="btn-salvar" onclick="salvarPerfil()">
+                Salvar alterações
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histórico de cursos -->
+        <div class="card">
+          <div class="card-header"><h3>Histórico de Cursos</h3></div>
+          <div class="card-body">
+            <div class="historico-list" id="historico-list">
+              <div style="text-align:center;padding:24px;color:var(--gray);">
+                <div style="font-size:32px;margin-bottom:8px;">📚</div>
+                <p style="font-size:14px;">Nenhum curso iniciado ainda.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth, onAuthStateChanged, signOut, updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, updateDoc, collection, getDocs, query, where
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
+    authDomain: "ser-mais-7d338.firebaseapp.com",
+    projectId: "ser-mais-7d338",
+    storageBucket: "ser-mais-7d338.firebasestorage.app",
+    messagingSenderId: "974915147883",
+    appId: "1:974915147883:web:b3c197a41bbf60033d392e",
+    measurementId: "G-JPM0YRW37Q"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let userData = {};
+
+  // Conquistas disponíveis
+  const conquistas = [
+    { id: 'primeiro-login', icon: '🌱', nome: 'Primeiro Passo', desc: 'Criou sua conta', campo: 'conquPrimeiroLogin' },
+    { id: 'primeiro-curso', icon: '📚', nome: 'Aprendiz', desc: 'Iniciou 1 curso', campo: 'conquPrimeiroCurso' },
+    { id: 'primeira-conclusao', icon: '🎓', nome: 'Graduado', desc: 'Concluiu 1 curso', campo: 'conquPrimeiraConclusao' },
+    { id: 'streak-7', icon: '🔥', nome: '7 Dias Seguidos', desc: 'Estudou 7 dias', campo: 'conquStreak7' },
+    { id: 'streak-30', icon: '💎', nome: '30 Dias Seguidos', desc: 'Estudou 30 dias', campo: 'conquStreak30' },
+    { id: 'tres-certs', icon: '🏆', nome: 'Colecionador', desc: '3 certificados', campo: 'conquTresCerts' },
+    { id: 'perfil-completo', icon: '⭐', nome: 'Perfil Completo', desc: 'Preencheu o perfil', campo: 'conquPerfilCompleto' },
+    { id: 'nivel5', icon: '🚀', nome: 'Nível 5', desc: 'Alcançou o nível 5', campo: 'conquNivel5' },
+  ];
+
+  // Auth
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+
+    // Carrega dados do Firestore
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) userData = snap.data();
+    } catch(e) {}
+
+    preencherPerfil(user);
+    carregarHistorico(user.uid);
+    renderConquistas();
+    document.getElementById('loading').style.display = 'none';
+  });
+
+  function preencherPerfil(user) {
+    const nome = userData.nome || user.displayName || '';
+    const email = user.email || '';
+    const nivel = userData.nivel || 1;
+    const xp = userData.xp || 0;
+
+    // Sidebar
+    document.getElementById('sidebar-nome').textContent = nome || '—';
+    document.getElementById('sidebar-nivel').textContent = `⭐ Nível ${nivel}`;
+
+    // Foto
+    const fotoEl = document.getElementById('foto-display');
+    const fotoSidebar = document.getElementById('sidebar-avatar');
+    const fotoUrl = userData.foto || user.photoURL;
+    if (fotoUrl) {
+      fotoEl.innerHTML = `<img src="${fotoUrl}" alt="foto">`;
+      fotoSidebar.innerHTML = `<img src="${fotoUrl}" alt="foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    }
+
+    // Infos
+    document.getElementById('display-nome').textContent = nome || '—';
+    document.getElementById('display-email').textContent = email;
+    document.getElementById('display-nivel').textContent = `⭐ Nível ${nivel} · ${xp} XP`;
+
+    // Stats
+    document.getElementById('qs-certs').textContent = userData.certificados || 0;
+    document.getElementById('qs-streak').textContent = userData.streak || 0;
+    document.getElementById('qs-xp').textContent = xp;
+
+    // Form
+    document.getElementById('input-nome').value = nome;
+    document.getElementById('input-email').value = email;
+    if (userData.nascimento) document.getElementById('input-nascimento').value = userData.nascimento;
+    if (userData.genero) document.getElementById('input-genero').value = userData.genero;
+    if (userData.cidade) document.getElementById('input-cidade').value = userData.cidade;
+    if (userData.estado) document.getElementById('input-estado').value = userData.estado;
+    if (userData.origem) document.getElementById('input-origem').value = userData.origem;
+  }
+
+  // Carrega histórico de cursos
+  async function carregarHistorico(uid) {
+    const emojis = { 'inteligencia-emocional':'🧠','mercado-trabalho':'💼','autoconhecimento':'🌱','comunicacao':'🗣️','empreendedorismo':'💡','lideranca':'🤝','saude':'🏃','financas':'💰' };
+    try {
+      const snap = await getDocs(collection(db, 'progress', uid, 'cursos'));
+      const cursos = [];
+      snap.forEach(d => cursos.push({ id: d.id, ...d.data() }));
+      document.getElementById('qs-cursos').textContent = cursos.length;
+
+      if (cursos.length === 0) return;
+
+      document.getElementById('historico-list').innerHTML = cursos.map(c => `
+        <div class="hist-item">
+          <div class="hist-icon">${emojis[c.id] || '📚'}</div>
+          <div class="hist-info">
+            <h4>${c.titulo || c.id}</h4>
+            <p>${c.categoria || 'Curso SER+'}</p>
+            ${c.progresso >= 100 ? '<span class="badge-cert">🎓 Concluído</span>' : ''}
+          </div>
+          <div class="hist-prog">
+            <div class="hist-pct">${c.progresso || 0}%</div>
+            <div class="hist-pct-label">concluído</div>
+          </div>
+        </div>
+      `).join('');
+    } catch(e) {}
+  }
+
+  // Conquistas
+  function renderConquistas() {
+    const grid = document.getElementById('conquistas-grid');
+    grid.innerHTML = conquistas.map(c => {
+      const desbloqueada = userData[c.campo] === true ||
+        (c.id === 'primeiro-login') || // sempre desbloqueada ao criar conta
+        (c.id === 'primeiro-curso' && (userData.cursosIniciados || 0) >= 1) ||
+        (c.id === 'primeira-conclusao' && (userData.certificados || 0) >= 1) ||
+        (c.id === 'streak-7' && (userData.streak || 0) >= 7) ||
+        (c.id === 'streak-30' && (userData.streak || 0) >= 30) ||
+        (c.id === 'tres-certs' && (userData.certificados || 0) >= 3) ||
+        (c.id === 'nivel5' && (userData.nivel || 1) >= 5);
+      return `
+        <div class="conq-card ${desbloqueada ? '' : 'locked'}">
+          <div class="conq-icon">${c.icon}</div>
+          <div class="conq-nome">${c.nome}</div>
+          <div class="conq-desc">${c.desc}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Salvar perfil
+  window.salvarPerfil = async () => {
+    const nome = document.getElementById('input-nome').value.trim();
+    if (!nome) { mostrarAlerta('error', '⚠️ O nome é obrigatório.'); return; }
+
+    const btn = document.getElementById('btn-salvar');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Salvando...';
+
+    const nascimento = document.getElementById('input-nascimento').value;
+    const genero = document.getElementById('input-genero').value;
+    const cidade = document.getElementById('input-cidade').value.trim();
+    const estado = document.getElementById('input-estado').value;
+    const origem = document.getElementById('input-origem').value;
+
+    // Verifica se perfil está completo (conquista)
+    const perfilCompleto = nome && nascimento && cidade && estado;
+
+    try {
+      // Atualiza Firebase Auth
+      await updateProfile(currentUser, { displayName: nome });
+
+      // Atualiza Firestore
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        nome, nascimento, genero, cidade, estado, origem,
+        ...(perfilCompleto ? { conquPerfilCompleto: true } : {})
+      });
+
+      // Atualiza local
+      userData = { ...userData, nome, nascimento, genero, cidade, estado, origem };
+
+      // Atualiza display
+      document.getElementById('display-nome').textContent = nome;
+      document.getElementById('sidebar-nome').textContent = nome;
+      renderConquistas();
+
+      mostrarAlerta('success', '✅ Perfil atualizado com sucesso!');
+    } catch(e) {
+      mostrarAlerta('error', '❌ Erro ao salvar. Tente novamente.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Salvar alterações';
+  };
+
+  // Upload de foto
+  document.getElementById('foto-input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      mostrarAlerta('error', '⚠️ A foto deve ter no máximo 2MB.');
+      return;
+    }
+
+    // Converte para base64 e salva como URL de dados
+    // (sem Storage, usamos URL do Google do próprio usuário ou base64 pequeno)
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+      try {
+        // Atualiza foto no Auth
+        await updateProfile(currentUser, { photoURL: base64 });
+        // Atualiza no Firestore
+        await updateDoc(doc(db, 'users', currentUser.uid), { foto: base64 });
+        // Atualiza display
+        document.getElementById('foto-display').innerHTML = `<img src="${base64}" alt="foto">`;
+        document.getElementById('sidebar-avatar').innerHTML = `<img src="${base64}" alt="foto" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        mostrarAlerta('success', '✅ Foto atualizada!');
+      } catch(e) {
+        mostrarAlerta('error', '❌ Erro ao atualizar foto.');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function mostrarAlerta(tipo, msg) {
+    const el = document.getElementById('form-alert');
+    el.innerHTML = `<div class="alert ${tipo}">${msg}</div>`;
+    setTimeout(() => el.innerHTML = '', 4000);
+  }
+
+  // Logout
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  });
+</script>
+
+</body>
+</html>
