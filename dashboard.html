@@ -8,69 +8,87 @@
 <style>
   :root {
     --green: #009C3B; --green-dark: #007A2E; --green-light: #E8F8EE;
-    --green-mid: #C5EDDA; --white: #FFFFFF; --off-white: #F7FAF8;
-    --gray-light: #F0F4F2; --gray: #8A9E94; --gray-dark: #3D4F46;
-    --black: #1A2620; --sidebar-w: 240px;
+    --green-mid: #C5EDDA; --off-white: #F7FAF8; --gray-light: #F0F4F2;
+    --gray: #8A9E94; --gray-dark: #3D4F46; --black: #1A2620;
+    --sidebar-w: 240px;
     --font-display: 'Baloo 2', cursive; --font-body: 'DM Sans', sans-serif;
   }
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: var(--font-body); background: var(--off-white); color: var(--black); display: flex; min-height: 100vh; }
 
-  /* SIDEBAR */
-  .sidebar {
-    width: var(--sidebar-w); background: var(--black); height: 100vh;
-    position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 50;
-  }
-  .sidebar-logo { padding: 24px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  /* ── LOADING ── */
+  #loading { position: fixed; inset: 0; background: var(--off-white); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 12px; }
+  #loading .logo { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--green); }
+  .dot { display: inline-block; width: 8px; height: 8px; background: var(--green); border-radius: 50%; margin: 0 3px; animation: bounce 1.2s infinite; }
+  .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* ── OVERLAY (mobile) ── */
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; }
+  .sidebar-overlay.show { display: block; }
+
+  /* ── SIDEBAR ── */
+  .sidebar { width: var(--sidebar-w); background: var(--black); height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 50; transition: transform 0.3s ease; }
+  .sidebar-logo { padding: 24px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; }
   .sidebar-logo a { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--green); text-decoration: none; }
+  .sidebar-close { display: none; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 22px; cursor: pointer; padding: 4px; }
   .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
   .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 0 10px; margin: 18px 0 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: rgba(255,255,255,0.5); font-size: 13.5px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; color: rgba(255,255,255,0.5); font-size: 13.5px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; }
   .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
   .nav-item.active { background: var(--green); color: white; font-weight: 500; }
   .nav-item .icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
-  .sidebar-user { padding: 16px 20px 20px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .sidebar-user { padding: 16px 20px 20px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 10px; }
   .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--green), #00C853); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; overflow: hidden; }
   .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .user-name { font-size: 13px; font-weight: 600; color: white; }
   .user-level { font-size: 11px; color: var(--green); margin-top: 2px; }
+  .btn-logout { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; color: rgba(255,255,255,0.35); font-size: 12px; cursor: pointer; border: none; background: none; width: 100%; margin-top: 4px; transition: all 0.15s; }
+  .btn-logout:hover { background: rgba(255,0,0,0.1); color: #ff6b6b; }
 
-  /* MAIN */
+  /* ── MAIN ── */
   .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
-  .topbar { background: white; padding: 14px 36px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--gray-light); position: sticky; top: 0; z-index: 40; }
-  .topbar-greeting { flex: 1; }
-  .topbar-greeting h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
-  .topbar-greeting p { font-size: 13px; color: var(--gray); margin-top: 2px; }
-  .content { padding: 32px 36px; flex: 1; }
+  .topbar { background: white; padding: 14px 28px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--gray-light); position: sticky; top: 0; z-index: 40; }
+  .menu-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--black); padding: 4px; flex-shrink: 0; }
+  .topbar-greeting { flex: 1; min-width: 0; }
+  .topbar-greeting h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-greeting p { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .content { padding: 28px 28px; flex: 1; }
 
-  /* XP BANNER */
-  .xp-banner { background: linear-gradient(135deg, var(--green), #00C853); border-radius: 20px; padding: 24px 32px; display: flex; align-items: center; gap: 32px; margin-bottom: 36px; position: relative; overflow: hidden; }
+  /* ── XP BANNER ── */
+  .xp-banner { background: linear-gradient(135deg, var(--green), #00C853); border-radius: 18px; padding: 22px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 32px; position: relative; overflow: hidden; }
   .xp-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.08); }
-  .xp-icon { font-size: 36px; }
-  .xp-info { flex: 1; }
-  .xp-info h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: white; margin-bottom: 8px; }
+  .xp-icon { font-size: 32px; flex-shrink: 0; }
+  .xp-info { flex: 1; min-width: 0; }
+  .xp-info h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: white; margin-bottom: 7px; }
   .xp-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 100px; height: 7px; overflow: hidden; margin-bottom: 4px; }
   .xp-bar-fill { height: 100%; background: white; border-radius: 100px; transition: width 1s ease; }
-  .xp-label { font-size: 12px; color: rgba(255,255,255,0.8); }
-  .xp-badges { display: flex; gap: 12px; position: relative; z-index: 1; }
-  .xp-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; padding: 10px 14px; text-align: center; color: white; min-width: 70px; }
-  .xp-badge .num { font-family: var(--font-display); font-size: 22px; font-weight: 800; line-height: 1; }
+  .xp-label { font-size: 11px; color: rgba(255,255,255,0.8); }
+  .xp-badges { display: flex; gap: 10px; position: relative; z-index: 1; flex-shrink: 0; }
+  .xp-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; padding: 8px 12px; text-align: center; color: white; min-width: 64px; }
+  .xp-badge .num { font-family: var(--font-display); font-size: 20px; font-weight: 800; line-height: 1; }
   .xp-badge .lbl { font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
-  /* SECTION */
-  .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .section-row h2 { font-family: var(--font-display); font-size: 19px; font-weight: 700; }
+  /* ── SECTION ROW ── */
+  .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-row h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
   .section-row h2 span { font-size: 13px; font-weight: 400; color: var(--gray); margin-left: 6px; }
-  .see-all { font-size: 13px; font-weight: 500; color: var(--green); text-decoration: none; }
+  .see-all { font-size: 13px; font-weight: 500; color: var(--green); text-decoration: none; white-space: nowrap; }
 
-  /* CURSOS EM ANDAMENTO */
-  .progress-scroll { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 40px; }
-  .prog-card { background: white; border-radius: 18px; overflow: hidden; min-width: 270px; border: 1px solid var(--gray-light); transition: all 0.25s; cursor: pointer; flex-shrink: 0; }
+  /* ── PROGRESS SCROLL ── */
+  .progress-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 36px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .progress-scroll::-webkit-scrollbar { display: none; }
+  .prog-card { background: white; border-radius: 16px; overflow: hidden; min-width: 260px; border: 1px solid var(--gray-light); transition: all 0.25s; cursor: pointer; flex-shrink: 0; }
   .prog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); border-color: var(--green-mid); }
-  .prog-thumb { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .prog-thumb { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+  .prog-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .prog-thumb.g1 { background: linear-gradient(135deg, #009C3B, #00C853); }
   .prog-thumb.g2 { background: linear-gradient(135deg, #00897B, #4DB6AC); }
   .prog-thumb.g3 { background: linear-gradient(135deg, #558B2F, #9CCC65); }
+  .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .prog-card:hover .play-overlay { background: rgba(0,0,0,0.2); }
+  .play-circle { width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; padding-left: 3px; opacity: 0; transform: scale(0.8); transition: all 0.2s; }
+  .prog-card:hover .play-circle { opacity: 1; transform: scale(1); }
   .prog-info { padding: 16px 18px 18px; }
   .prog-cat { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 5px; }
   .prog-info h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
@@ -79,56 +97,117 @@
   .prog-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); }
   .prog-meta strong { color: var(--green); }
 
-  /* CATÁLOGO */
-  .catalog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 40px; }
+  /* ── CATALOG GRID ── */
+  .catalog-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 36px; }
   .cat-card { background: white; border-radius: 14px; overflow: hidden; border: 1px solid var(--gray-light); cursor: pointer; transition: all 0.22s; }
   .cat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.09); border-color: var(--green-mid); }
   .cat-thumb { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 34px; }
-  .c1 { background: #E8F8EE; } .c2 { background: #E0F2F1; } .c3 { background: #FFF3E0; }
-  .c4 { background: #F3E5F5; } .c5 { background: #FFEBEE; } .c6 { background: #E3F2FD; }
-  .c7 { background: #F1F8E9; } .c8 { background: #FFFDE7; }
+  .cat-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .c1{background:#E8F8EE} .c2{background:#E0F2F1} .c3{background:#FFF3E0}
+  .c4{background:#F3E5F5} .c5{background:#FFEBEE} .c6{background:#E3F2FD}
+  .c7{background:#F1F8E9} .c8{background:#FFFDE7}
   .cat-body { padding: 12px 14px 16px; }
   .cat-body h4 { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 3px; }
   .cat-body p { font-size: 11px; color: var(--gray); }
   .cat-tag { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; background: var(--green-light); color: var(--green-dark); }
 
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 40px; color: var(--gray); }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+  /* ── BOTTOM NAV (mobile) ── */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid var(--gray-light);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px);
+    z-index: 45;
+    justify-content: space-around;
+  }
 
-  /* LOGOUT */
-  .btn-logout { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; color: rgba(255,255,255,0.4); font-size: 13px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; margin-top: 8px; transition: all 0.15s; }
-  .btn-logout:hover { background: rgba(255,0,0,0.1); color: #ff6b6b; }
+  .bn-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10px; color: var(--gray); cursor: pointer;
+    padding: 6px 12px; border-radius: 10px;
+    transition: color 0.15s; border: none; background: none;
+    text-decoration: none;
+  }
+
+  .bn-item.active { color: var(--green); }
+  .bn-item .bn-icon { font-size: 22px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .catalog-grid { grid-template-columns: repeat(3,1fr); }
+    .xp-badges { display: none; }
+  }
+
+  @media (max-width: 768px) {
+    /* Sidebar vira drawer */
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-close { display: block; }
+    .main { margin-left: 0; }
+    .menu-btn { display: block; }
+    .content { padding: 20px 16px 80px; } /* padding bottom para bottom nav */
+    .topbar { padding: 12px 16px; }
+    .catalog-grid { grid-template-columns: repeat(2,1fr); }
+    .xp-banner { padding: 18px 20px; gap: 14px; }
+    .xp-banner::before { display: none; }
+    .xp-info h3 { font-size: 14px; }
+    .bottom-nav { display: flex; }
+    .prog-card { min-width: 230px; }
+  }
+
+  @media (max-width: 480px) {
+    .catalog-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+    .xp-badge { min-width: 54px; padding: 6px 8px; }
+    .xp-badge .num { font-size: 18px; }
+    .section-row h2 { font-size: 16px; }
+  }
+
+  @media (max-width: 360px) {
+    .catalog-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .content { padding: 16px 12px 80px; }
+  }
 </style>
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-logo"><a href="index.html">SER+</a></div>
+<div id="loading"><div class="logo">SER+</div><div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+
+<!-- Overlay mobile -->
+<div class="sidebar-overlay" id="overlay" onclick="fecharSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="index.html">SER+</a>
+    <button class="sidebar-close" onclick="fecharSidebar()">✕</button>
+  </div>
   <nav class="sidebar-nav">
     <div class="nav-label">Principal</div>
     <button class="nav-item active"><span class="icon">🏠</span> Início</button>
-    <button class="nav-item"><span class="icon">📚</span> Meus Cursos</button>
+    <button class="nav-item" onclick="window.location.href='perfil.html'"><span class="icon">📚</span> Meus Cursos</button>
     <button class="nav-item"><span class="icon">🎯</span> Catálogo</button>
     <div class="nav-label">Progresso</div>
     <button class="nav-item"><span class="icon">🏆</span> Conquistas</button>
-    <button class="nav-item"><span class="icon">🎓</span> Certificados</button>
+    <button class="nav-item" onclick="window.location.href='certificado.html'"><span class="icon">🎓</span> Certificados</button>
     <div class="nav-label">Conta</div>
-    <button class="nav-item"><span class="icon">👤</span> Meu Perfil</button>
+    <button class="nav-item" onclick="window.location.href='perfil.html'"><span class="icon">👤</span> Meu Perfil</button>
     <button class="btn-logout" id="btn-logout"><span>🚪</span> Sair</button>
   </nav>
   <div class="sidebar-user">
     <div class="user-avatar" id="sidebar-avatar">👤</div>
     <div>
-      <div class="user-name" id="sidebar-name">Carregando...</div>
+      <div class="user-name" id="sidebar-name">—</div>
       <div class="user-level" id="sidebar-level">⭐ Nível 1</div>
     </div>
   </div>
 </aside>
 
+<!-- MAIN -->
 <main class="main">
   <div class="topbar">
+    <button class="menu-btn" onclick="abrirSidebar()">☰</button>
     <div class="topbar-greeting">
       <h1 id="greeting">Olá! 👋</h1>
       <p id="topbar-date"></p>
@@ -136,7 +215,6 @@
   </div>
 
   <div class="content">
-
     <!-- XP Banner -->
     <div class="xp-banner">
       <div class="xp-icon">🔥</div>
@@ -146,120 +224,109 @@
         <div class="xp-label" id="xp-label">0 / 1000 XP para o Nível 2</div>
       </div>
       <div class="xp-badges">
-        <div class="xp-badge"><div class="num" id="badge-streak">0</div><div class="lbl">Dias seguidos</div></div>
-        <div class="xp-badge"><div class="num" id="badge-cursos">0</div><div class="lbl">Em andamento</div></div>
-        <div class="xp-badge"><div class="num" id="badge-certs">0</div><div class="lbl">Certificados</div></div>
+        <div class="xp-badge"><div class="num" id="badge-streak">0</div><div class="lbl">Dias</div></div>
+        <div class="xp-badge"><div class="num" id="badge-certs">0</div><div class="lbl">Certs</div></div>
       </div>
     </div>
 
     <!-- Cursos em andamento -->
     <div class="section-row">
       <h2>Continuar assistindo <span id="prog-count"></span></h2>
+      <a href="#" class="see-all">Ver todos →</a>
     </div>
     <div class="progress-scroll" id="progress-list">
-      <div class="empty-state">
-        <div class="icon">📚</div>
-        <p>Você ainda não iniciou nenhum curso.<br>Explore o catálogo abaixo!</p>
+      <div style="padding:24px;color:var(--gray);text-align:center;font-size:14px;min-width:200px;">
+        <div style="font-size:32px;margin-bottom:8px;">📚</div>
+        Nenhum curso iniciado ainda.
       </div>
     </div>
 
     <!-- Catálogo -->
     <div class="section-row">
       <h2>Explorar catálogo</h2>
+      <a href="#" class="see-all">Ver tudo →</a>
     </div>
-    <div class="catalog-grid" id="catalog-grid">
-      <!-- Preenchido dinamicamente -->
-    </div>
-
+    <div class="catalog-grid" id="catalog-grid"></div>
   </div>
 </main>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="bn-item active"><span class="bn-icon">🏠</span>Início</a>
+  <a href="#" class="bn-item"><span class="bn-icon">🎯</span>Cursos</a>
+  <a href="certificado.html" class="bn-item"><span class="bn-icon">🎓</span>Certs</a>
+  <a href="perfil.html" class="bn-item"><span class="bn-icon">👤</span>Perfil</a>
+</nav>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
+  const app = initializeApp({
     apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
     authDomain: "ser-mais-7d338.firebaseapp.com",
     projectId: "ser-mais-7d338",
     storageBucket: "ser-mais-7d338.firebasestorage.app",
     messagingSenderId: "974915147883",
-    appId: "1:974915147883:web:b3c197a41bbf60033d392e",
-    measurementId: "G-JPM0YRW37Q"
-  };
+    appId: "1:974915147883:web:b3c197a41bbf60033d392e"
+  });
 
-  const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Data atual
   const days = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
   const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const now = new Date();
   document.getElementById('topbar-date').textContent = `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]}`;
 
-  // Verifica autenticação
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      window.location.href = 'login.html';
-      return;
-    }
-
-    // Preenche dados do usuário
+    if (!user) { window.location.href = 'login.html'; return; }
     const nome = user.displayName || user.email.split('@')[0];
     document.getElementById('greeting').textContent = `Olá, ${nome.split(' ')[0]} 👋`;
     document.getElementById('sidebar-name').textContent = nome;
-    document.getElementById('xp-msg').textContent = `Você está indo bem, ${nome.split(' ')[0]}!`;
-
     if (user.photoURL) {
       document.getElementById('sidebar-avatar').innerHTML = `<img src="${user.photoURL}" alt="foto">`;
     }
-
-    // Carrega dados do Firestore
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        const nivel = data.nivel || 1;
-        const xp = data.xp || 0;
-        const xpProximo = nivel * 1000;
-        const pct = Math.min((xp / xpProximo) * 100, 100);
-
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const d = snap.data();
+        const nivel = d.nivel || 1; const xp = d.xp || 0;
+        const pct = Math.min((xp / (nivel * 1000)) * 100, 100);
         document.getElementById('sidebar-level').textContent = `⭐ Nível ${nivel}`;
         document.getElementById('xp-bar').style.width = pct + '%';
-        document.getElementById('xp-label').textContent = `${xp} / ${xpProximo} XP para o Nível ${nivel + 1}`;
-        document.getElementById('badge-streak').textContent = data.streak || 0;
-        document.getElementById('badge-certs').textContent = data.certificados || 0;
+        document.getElementById('xp-label').textContent = `${xp} / ${nivel * 1000} XP para o Nível ${nivel + 1}`;
+        document.getElementById('xp-msg').textContent = `Você está indo bem, ${nome.split(' ')[0]}!`;
+        document.getElementById('badge-streak').textContent = d.streak || 0;
+        document.getElementById('badge-certs').textContent = d.certificados || 0;
       }
-    } catch (e) { console.log('Erro ao carregar dados do usuário', e); }
+    } catch(e) {}
 
-    // Carrega catálogo de cursos
     carregarCatalogo();
     carregarProgresso(user.uid);
+    document.getElementById('loading').style.display = 'none';
   });
 
-  // Catálogo fixo (você adiciona cursos no Firestore depois)
   const cursosFixos = [
-    { id: 'inteligencia-emocional', emoji: '🧠', titulo: 'Inteligência Emocional', desc: '8 aulas · 3h 20min', cor: 'c1', status: 'Disponível' },
-    { id: 'mercado-trabalho', emoji: '💼', titulo: 'Mercado de Trabalho', desc: '12 aulas · 5h 10min', cor: 'c2', status: 'Disponível' },
-    { id: 'autoconhecimento', emoji: '🌱', titulo: 'Autoconhecimento', desc: '6 aulas · 2h 45min', cor: 'c3', status: 'Disponível' },
-    { id: 'comunicacao', emoji: '🗣️', titulo: 'Comunicação Assertiva', desc: '10 aulas · 4h 00min', cor: 'c4', status: 'Disponível' },
-    { id: 'empreendedorismo', emoji: '💡', titulo: 'Empreendedorismo', desc: '9 aulas · 3h 50min', cor: 'c5', status: 'Em breve' },
-    { id: 'lideranca', emoji: '🤝', titulo: 'Liderança Positiva', desc: '7 aulas · 3h 00min', cor: 'c6', status: 'Em breve' },
-    { id: 'saude', emoji: '🏃', titulo: 'Saúde e Bem-estar', desc: '5 aulas · 2h 15min', cor: 'c7', status: 'Em breve' },
-    { id: 'financas', emoji: '💰', titulo: 'Educação Financeira', desc: '8 aulas · 3h 30min', cor: 'c8', status: 'Em breve' },
+    { id:'inteligencia-emocional', emoji:'🧠', titulo:'Inteligência Emocional', desc:'8 aulas · 3h 20min', cor:'c1', status:'Disponível' },
+    { id:'mercado-trabalho', emoji:'💼', titulo:'Mercado de Trabalho', desc:'12 aulas · 5h 10min', cor:'c2', status:'Disponível' },
+    { id:'autoconhecimento', emoji:'🌱', titulo:'Autoconhecimento', desc:'6 aulas · 2h 45min', cor:'c3', status:'Disponível' },
+    { id:'comunicacao', emoji:'🗣️', titulo:'Comunicação Assertiva', desc:'10 aulas · 4h 00min', cor:'c4', status:'Disponível' },
+    { id:'empreendedorismo', emoji:'💡', titulo:'Empreendedorismo', desc:'9 aulas · 3h 50min', cor:'c5', status:'Em breve' },
+    { id:'lideranca', emoji:'🤝', titulo:'Liderança Positiva', desc:'7 aulas · 3h 00min', cor:'c6', status:'Em breve' },
+    { id:'saude', emoji:'🏃', titulo:'Saúde e Bem-estar', desc:'5 aulas · 2h 15min', cor:'c7', status:'Em breve' },
+    { id:'financas', emoji:'💰', titulo:'Educação Financeira', desc:'8 aulas · 3h 30min', cor:'c8', status:'Em breve' },
   ];
 
   function carregarCatalogo() {
-    const grid = document.getElementById('catalog-grid');
-    grid.innerHTML = cursosFixos.map(c => `
+    document.getElementById('catalog-grid').innerHTML = cursosFixos.map(c => `
       <div class="cat-card" onclick="window.location.href='curso.html?id=${c.id}'">
         <div class="cat-thumb ${c.cor}">${c.emoji}</div>
         <div class="cat-body">
           <h4>${c.titulo}</h4>
           <p>${c.desc}</p>
-          <span class="cat-tag" style="${c.status !== 'Disponível' ? 'background:#FFF3E0;color:#E65100;' : ''}">${c.status}</span>
+          <span class="cat-tag" style="${c.status!=='Disponível'?'background:#FFF3E0;color:#E65100;':''}">${c.status}</span>
         </div>
       </div>
     `).join('');
@@ -270,39 +337,44 @@
       const snap = await getDocs(collection(db, 'progress', uid, 'cursos'));
       const cursos = [];
       snap.forEach(d => cursos.push({ id: d.id, ...d.data() }));
-
-      document.getElementById('badge-cursos').textContent = cursos.length;
-
+      document.getElementById('badge-streak');
       if (cursos.length === 0) return;
-
-      document.getElementById('prog-count').textContent = `${cursos.length} curso${cursos.length > 1 ? 's' : ''}`;
-
-      const cores = ['g1', 'g2', 'g3'];
-      const lista = document.getElementById('progress-list');
-      lista.innerHTML = cursos.map((c, i) => {
-        const curso = cursosFixos.find(x => x.id === c.id) || { emoji: '📚', titulo: c.id, cor: 'c1' };
-        const pct = c.progresso || 0;
+      document.getElementById('prog-count').textContent = `${cursos.length} curso${cursos.length>1?'s':''}`;
+      const cores = ['g1','g2','g3'];
+      document.getElementById('progress-list').innerHTML = cursos.map((c,i) => {
+        const curso = cursosFixos.find(x => x.id === c.id) || { emoji:'📚', titulo: c.id };
         return `
           <div class="prog-card" onclick="window.location.href='curso.html?id=${c.id}'">
-            <div class="prog-thumb ${cores[i % 3]}">${curso.emoji}</div>
+            <div class="prog-thumb ${cores[i%3]}">
+              ${curso.emoji}
+              <div class="play-overlay"><div class="play-circle">▶</div></div>
+            </div>
             <div class="prog-info">
               <div class="prog-cat">Curso</div>
               <h3>${curso.titulo}</h3>
-              <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${pct}%"></div></div>
-              <div class="prog-meta"><span><strong>${pct}%</strong> concluído</span><span>Módulo ${c.moduloAtual || 1}</span></div>
+              <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${c.progresso||0}%"></div></div>
+              <div class="prog-meta"><span><strong>${c.progresso||0}%</strong> concluído</span></div>
             </div>
-          </div>
-        `;
+          </div>`;
       }).join('');
-    } catch (e) { console.log('Sem progresso ainda', e); }
+    } catch(e) {}
   }
 
-  // Logout
   document.getElementById('btn-logout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = 'login.html';
+    await signOut(auth); window.location.href = 'login.html';
   });
-</script>
 
+  // Mobile sidebar
+  window.abrirSidebar = () => {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+  window.fecharSidebar = () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+    document.body.style.overflow = '';
+  };
+</script>
 </body>
 </html>
