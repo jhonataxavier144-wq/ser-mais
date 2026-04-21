@@ -23,7 +23,7 @@
   .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
   @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 
-  /* ── OVERLAY (mobile) ── */
+  /* ── OVERLAY ── */
   .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; }
   .sidebar-overlay.show { display: block; }
 
@@ -31,7 +31,7 @@
   .sidebar { width: var(--sidebar-w); background: var(--black); height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 50; transition: transform 0.3s ease; }
   .sidebar-logo { padding: 24px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: space-between; }
   .sidebar-logo a { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--green); text-decoration: none; }
-  .sidebar-close { display: none; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 22px; cursor: pointer; padding: 4px; }
+  .sidebar-close { display: none; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 22px; cursor: pointer; }
   .sidebar-nav { flex: 1; padding: 20px 12px; overflow-y: auto; }
   .nav-label { font-size: 9px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 0 10px; margin: 18px 0 6px; }
   .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; color: rgba(255,255,255,0.5); font-size: 13.5px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; border: none; background: none; width: 100%; text-align: left; }
@@ -48,15 +48,23 @@
 
   /* ── MAIN ── */
   .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── TOPBAR ── */
   .topbar { background: white; padding: 14px 28px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--gray-light); position: sticky; top: 0; z-index: 40; }
-  .menu-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--black); padding: 4px; flex-shrink: 0; }
+  .menu-btn { display: none; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--black); flex-shrink: 0; }
   .topbar-greeting { flex: 1; min-width: 0; }
   .topbar-greeting h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .topbar-greeting p { font-size: 12px; color: var(--gray); margin-top: 2px; }
-  .content { padding: 28px 28px; flex: 1; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .topbar-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; overflow: hidden; flex-shrink: 0; }
+  .topbar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* ── VIEWS ── */
+  .view { display: none; padding: 28px; flex: 1; }
+  .view.active { display: block; }
 
   /* ── XP BANNER ── */
-  .xp-banner { background: linear-gradient(135deg, var(--green), #00C853); border-radius: 18px; padding: 22px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 32px; position: relative; overflow: hidden; }
+  .xp-banner { background: linear-gradient(135deg, var(--green), #00C853); border-radius: 18px; padding: 22px 28px; display: flex; align-items: center; gap: 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
   .xp-banner::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.08); }
   .xp-icon { font-size: 32px; flex-shrink: 0; }
   .xp-info { flex: 1; min-width: 0; }
@@ -64,8 +72,8 @@
   .xp-bar-wrap { background: rgba(255,255,255,0.25); border-radius: 100px; height: 7px; overflow: hidden; margin-bottom: 4px; }
   .xp-bar-fill { height: 100%; background: white; border-radius: 100px; transition: width 1s ease; }
   .xp-label { font-size: 11px; color: rgba(255,255,255,0.8); }
-  .xp-badges { display: flex; gap: 10px; position: relative; z-index: 1; flex-shrink: 0; }
-  .xp-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; padding: 8px 12px; text-align: center; color: white; min-width: 64px; }
+  .xp-badges { display: flex; gap: 10px; flex-shrink: 0; }
+  .xp-badge { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 10px; padding: 8px 14px; text-align: center; color: white; }
   .xp-badge .num { font-family: var(--font-display); font-size: 20px; font-weight: 800; line-height: 1; }
   .xp-badge .lbl { font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
@@ -73,22 +81,17 @@
   .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .section-row h2 { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
   .section-row h2 span { font-size: 13px; font-weight: 400; color: var(--gray); margin-left: 6px; }
-  .see-all { font-size: 13px; font-weight: 500; color: var(--green); text-decoration: none; white-space: nowrap; }
 
   /* ── PROGRESS SCROLL ── */
-  .progress-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 36px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .progress-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 32px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .progress-scroll::-webkit-scrollbar { display: none; }
   .prog-card { background: white; border-radius: 16px; overflow: hidden; min-width: 260px; border: 1px solid var(--gray-light); transition: all 0.25s; cursor: pointer; flex-shrink: 0; }
   .prog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); border-color: var(--green-mid); }
-  .prog-thumb { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
+  .prog-thumb { height: 130px; display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; overflow: hidden; }
   .prog-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .prog-thumb.g1 { background: linear-gradient(135deg, #009C3B, #00C853); }
   .prog-thumb.g2 { background: linear-gradient(135deg, #00897B, #4DB6AC); }
   .prog-thumb.g3 { background: linear-gradient(135deg, #558B2F, #9CCC65); }
-  .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0); display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-  .prog-card:hover .play-overlay { background: rgba(0,0,0,0.2); }
-  .play-circle { width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; padding-left: 3px; opacity: 0; transform: scale(0.8); transition: all 0.2s; }
-  .prog-card:hover .play-circle { opacity: 1; transform: scale(1); }
   .prog-info { padding: 16px 18px 18px; }
   .prog-cat { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 5px; }
   .prog-info h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
@@ -98,10 +101,10 @@
   .prog-meta strong { color: var(--green); }
 
   /* ── CATALOG GRID ── */
-  .catalog-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 36px; }
+  .catalog-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
   .cat-card { background: white; border-radius: 14px; overflow: hidden; border: 1px solid var(--gray-light); cursor: pointer; transition: all 0.22s; }
   .cat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.09); border-color: var(--green-mid); }
-  .cat-thumb { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 34px; }
+  .cat-thumb { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 34px; overflow: hidden; }
   .cat-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .c1{background:#E8F8EE} .c2{background:#E0F2F1} .c3{background:#FFF3E0}
   .c4{background:#F3E5F5} .c5{background:#FFEBEE} .c6{background:#E3F2FD}
@@ -111,62 +114,93 @@
   .cat-body p { font-size: 11px; color: var(--gray); }
   .cat-tag { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; background: var(--green-light); color: var(--green-dark); }
 
+  /* ── MEUS CURSOS ── */
+  .meus-cursos-list { display: flex; flex-direction: column; gap: 14px; }
+  .mc-card { background: white; border-radius: 14px; border: 1px solid var(--gray-light); display: flex; gap: 0; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+  .mc-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--green-mid); transform: translateY(-2px); }
+  .mc-thumb { width: 140px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .mc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .mc-thumb.g1{background:linear-gradient(135deg,#009C3B,#00C853)}
+  .mc-thumb.g2{background:linear-gradient(135deg,#00897B,#4DB6AC)}
+  .mc-thumb.g3{background:linear-gradient(135deg,#558B2F,#9CCC65)}
+  .mc-info { flex: 1; padding: 18px 20px; }
+  .mc-cat { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
+  .mc-info h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+  .mc-bar-wrap { background: var(--gray-light); border-radius: 100px; height: 5px; margin-bottom: 6px; overflow: hidden; }
+  .mc-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #00C853); border-radius: 100px; }
+  .mc-meta { font-size: 12px; color: var(--gray); }
+  .mc-meta strong { color: var(--green); }
+  .mc-action { padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 10px; flex-shrink: 0; }
+  .btn-continuar { background: var(--green); color: white; padding: 9px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+  .btn-continuar:hover { background: var(--green-dark); }
+
+  /* ── CONQUISTAS ── */
+  .conq-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .conq-card { background: white; border-radius: 14px; padding: 20px 16px; text-align: center; border: 1px solid var(--gray-light); transition: all 0.2s; }
+  .conq-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.07); }
+  .conq-card.locked { opacity: 0.35; filter: grayscale(1); }
+  .conq-card.locked:hover { transform: none; box-shadow: none; }
+  .conq-icon { font-size: 36px; margin-bottom: 10px; }
+  .conq-nome { font-family: var(--font-display); font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .conq-desc { font-size: 11px; color: var(--gray); line-height: 1.4; }
+  .conq-badge { display: inline-block; margin-top: 8px; font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 100px; background: var(--green-light); color: var(--green-dark); }
+  .conq-badge.locked-badge { background: var(--gray-light); color: var(--gray); }
+
+  /* ── CERTIFICADOS ── */
+  .cert-list { display: flex; flex-direction: column; gap: 14px; }
+  .cert-card { background: white; border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; gap: 20px; border: 1px solid var(--gray-light); transition: all 0.2s; }
+  .cert-card:hover { border-color: var(--green-mid); box-shadow: 0 4px 20px rgba(0,156,59,0.08); }
+  .cert-medal { width: 52px; height: 52px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+  .cert-info { flex: 1; }
+  .cert-info h4 { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .cert-info p { font-size: 13px; color: var(--gray); }
+  .cert-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-sm { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border-radius: 100px; font-family: var(--font-body); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.18s; border: none; text-decoration: none; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-outline-sm { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+  .btn-outline-sm:hover { background: var(--green-light); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 60px 40px; color: var(--gray); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--black); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+  .empty-state .btn-empty { display: inline-flex; align-items: center; gap: 8px; margin-top: 20px; background: var(--green); color: white; padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+  .empty-state .btn-empty:hover { background: var(--green-dark); transform: translateY(-1px); }
+
   /* ── BOTTOM NAV (mobile) ── */
-  .bottom-nav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: white;
-    border-top: 1px solid var(--gray-light);
-    padding: 8px 0 env(safe-area-inset-bottom, 8px);
-    z-index: 45;
-    justify-content: space-around;
-  }
-
-  .bn-item {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    font-size: 10px; color: var(--gray); cursor: pointer;
-    padding: 6px 12px; border-radius: 10px;
-    transition: color 0.15s; border: none; background: none;
-    text-decoration: none;
-  }
-
+  .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--gray-light); padding: 8px 0 env(safe-area-inset-bottom, 8px); z-index: 45; justify-content: space-around; }
+  .bn-item { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: var(--gray); cursor: pointer; padding: 4px 12px; border-radius: 10px; transition: color 0.15s; border: none; background: none; }
   .bn-item.active { color: var(--green); }
   .bn-item .bn-icon { font-size: 22px; }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 1100px) {
     .catalog-grid { grid-template-columns: repeat(3,1fr); }
+    .conq-grid { grid-template-columns: repeat(3,1fr); }
     .xp-badges { display: none; }
   }
-
   @media (max-width: 768px) {
-    /* Sidebar vira drawer */
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
     .sidebar-close { display: block; }
     .main { margin-left: 0; }
     .menu-btn { display: block; }
-    .content { padding: 20px 16px 80px; } /* padding bottom para bottom nav */
-    .topbar { padding: 12px 16px; }
-    .catalog-grid { grid-template-columns: repeat(2,1fr); }
-    .xp-banner { padding: 18px 20px; gap: 14px; }
-    .xp-banner::before { display: none; }
-    .xp-info h3 { font-size: 14px; }
-    .bottom-nav { display: flex; }
-    .prog-card { min-width: 230px; }
-  }
-
-  @media (max-width: 480px) {
+    .view { padding: 16px 16px 80px; }
     .catalog-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
-    .xp-badge { min-width: 54px; padding: 6px 8px; }
-    .xp-badge .num { font-size: 18px; }
-    .section-row h2 { font-size: 16px; }
+    .conq-grid { grid-template-columns: repeat(2,1fr); }
+    .bottom-nav { display: flex; }
+    .xp-banner { padding: 18px 20px; }
+    .mc-thumb { width: 100px; }
+    .cert-actions { flex-direction: column; }
+    .topbar { padding: 12px 16px; }
   }
-
-  @media (max-width: 360px) {
-    .catalog-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .content { padding: 16px 12px 80px; }
+  @media (max-width: 480px) {
+    .catalog-grid { grid-template-columns: 1fr 1fr; }
+    .mc-card { flex-direction: column; }
+    .mc-thumb { width: 100%; height: 120px; }
+    .mc-action { flex-direction: row; padding: 12px 16px; border-top: 1px solid var(--gray-light); }
   }
 </style>
 </head>
@@ -174,7 +208,6 @@
 
 <div id="loading"><div class="logo">SER+</div><div><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
 
-<!-- Overlay mobile -->
 <div class="sidebar-overlay" id="overlay" onclick="fecharSidebar()"></div>
 
 <!-- SIDEBAR -->
@@ -185,12 +218,12 @@
   </div>
   <nav class="sidebar-nav">
     <div class="nav-label">Principal</div>
-    <button class="nav-item active"><span class="icon">🏠</span> Início</button>
-    <button class="nav-item" onclick="window.location.href='perfil.html'"><span class="icon">📚</span> Meus Cursos</button>
-    <button class="nav-item"><span class="icon">🎯</span> Catálogo</button>
+    <button class="nav-item active" id="nav-inicio" onclick="showView('inicio', this)"><span class="icon">🏠</span> Início</button>
+    <button class="nav-item" id="nav-cursos" onclick="showView('meus-cursos', this)"><span class="icon">📚</span> Meus Cursos</button>
+    <button class="nav-item" id="nav-catalogo" onclick="showView('catalogo', this)"><span class="icon">🎯</span> Catálogo</button>
     <div class="nav-label">Progresso</div>
-    <button class="nav-item"><span class="icon">🏆</span> Conquistas</button>
-    <button class="nav-item" onclick="window.location.href='certificado.html'"><span class="icon">🎓</span> Certificados</button>
+    <button class="nav-item" id="nav-conquistas" onclick="showView('conquistas', this)"><span class="icon">🏆</span> Conquistas</button>
+    <button class="nav-item" id="nav-certificados" onclick="showView('certificados', this)"><span class="icon">🎓</span> Certificados</button>
     <div class="nav-label">Conta</div>
     <button class="nav-item" onclick="window.location.href='perfil.html'"><span class="icon">👤</span> Meu Perfil</button>
     <button class="btn-logout" id="btn-logout"><span>🚪</span> Sair</button>
@@ -212,10 +245,13 @@
       <h1 id="greeting">Olá! 👋</h1>
       <p id="topbar-date"></p>
     </div>
+    <div class="topbar-actions">
+      <div class="topbar-avatar" id="topbar-avatar" onclick="window.location.href='perfil.html'">👤</div>
+    </div>
   </div>
 
-  <div class="content">
-    <!-- XP Banner -->
+  <!-- ══ INÍCIO ══ -->
+  <div class="view active" id="view-inicio">
     <div class="xp-banner">
       <div class="xp-icon">🔥</div>
       <div class="xp-info">
@@ -224,44 +260,112 @@
         <div class="xp-label" id="xp-label">0 / 1000 XP para o Nível 2</div>
       </div>
       <div class="xp-badges">
-        <div class="xp-badge"><div class="num" id="badge-streak">0</div><div class="lbl">Dias</div></div>
-        <div class="xp-badge"><div class="num" id="badge-certs">0</div><div class="lbl">Certs</div></div>
+        <div class="xp-badge"><div class="num" id="badge-streak">0</div><div class="lbl">Dias seguidos</div></div>
+        <div class="xp-badge"><div class="num" id="badge-certs">0</div><div class="lbl">Certificados</div></div>
       </div>
     </div>
 
-    <!-- Cursos em andamento -->
     <div class="section-row">
       <h2>Continuar assistindo <span id="prog-count"></span></h2>
-      <a href="#" class="see-all">Ver todos →</a>
+      <button style="background:none;border:none;color:var(--green);font-size:13px;font-weight:500;cursor:pointer;" onclick="showView('meus-cursos', document.getElementById('nav-cursos'))">Ver todos →</button>
     </div>
-    <div class="progress-scroll" id="progress-list">
-      <div style="padding:24px;color:var(--gray);text-align:center;font-size:14px;min-width:200px;">
-        <div style="font-size:32px;margin-bottom:8px;">📚</div>
-        Nenhum curso iniciado ainda.
+    <div class="progress-scroll" id="progress-list-inicio">
+      <div class="empty-state" style="padding:24px;min-width:260px;">
+        <div class="icon" style="font-size:32px;">📚</div>
+        <p style="font-size:13px;">Nenhum curso iniciado ainda.<br>Explore o catálogo!</p>
       </div>
     </div>
 
-    <!-- Catálogo -->
     <div class="section-row">
       <h2>Explorar catálogo</h2>
-      <a href="#" class="see-all">Ver tudo →</a>
+      <button style="background:none;border:none;color:var(--green);font-size:13px;font-weight:500;cursor:pointer;" onclick="showView('catalogo', document.getElementById('nav-catalogo'))">Ver tudo →</button>
     </div>
-    <div class="catalog-grid" id="catalog-grid"></div>
+    <div class="catalog-grid" id="catalog-grid-inicio"></div>
   </div>
+
+  <!-- ══ MEUS CURSOS ══ -->
+  <div class="view" id="view-meus-cursos">
+    <div class="section-row" style="margin-bottom:24px;">
+      <div>
+        <h2 style="font-family:var(--font-display);font-size:22px;font-weight:800;">Meus Cursos</h2>
+        <p style="font-size:13px;color:var(--gray);margin-top:4px;" id="meus-cursos-sub">Seus cursos em andamento e concluídos.</p>
+      </div>
+    </div>
+    <div class="meus-cursos-list" id="meus-cursos-list">
+      <div class="empty-state">
+        <div class="icon">📚</div>
+        <h3>Você ainda não iniciou nenhum curso</h3>
+        <p>Explore nosso catálogo e comece seu aprendizado hoje mesmo!</p>
+        <button class="btn-empty" onclick="showView('catalogo', document.getElementById('nav-catalogo'))">🎯 Explorar catálogo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CATÁLOGO ══ -->
+  <div class="view" id="view-catalogo">
+    <div class="section-row" style="margin-bottom:24px;">
+      <div>
+        <h2 style="font-family:var(--font-display);font-size:22px;font-weight:800;">Catálogo de Cursos</h2>
+        <p style="font-size:13px;color:var(--gray);margin-top:4px;">Todos os cursos disponíveis — 100% gratuitos.</p>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;" id="filtros">
+      <button class="filtro-btn active" onclick="filtrar('todos', this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrar('Disponível', this)">Disponíveis</button>
+      <button class="filtro-btn" onclick="filtrar('Em breve', this)">Em breve</button>
+    </div>
+
+    <style>
+      .filtro-btn { padding: 8px 18px; border-radius: 100px; border: 1.5px solid var(--gray-light); background: white; font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--gray-dark); cursor: pointer; transition: all 0.18s; }
+      .filtro-btn:hover { border-color: var(--green); color: var(--green); }
+      .filtro-btn.active { background: var(--green); color: white; border-color: var(--green); }
+    </style>
+
+    <div class="catalog-grid" id="catalog-grid-catalogo"></div>
+  </div>
+
+  <!-- ══ CONQUISTAS ══ -->
+  <div class="view" id="view-conquistas">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-family:var(--font-display);font-size:22px;font-weight:800;">Conquistas</h2>
+      <p style="font-size:13px;color:var(--gray);margin-top:4px;" id="conq-sub">Desbloqueie conquistas evoluindo na plataforma.</p>
+    </div>
+    <div class="conq-grid" id="conquistas-grid"></div>
+  </div>
+
+  <!-- ══ CERTIFICADOS ══ -->
+  <div class="view" id="view-certificados">
+    <div style="margin-bottom:24px;">
+      <h2 style="font-family:var(--font-display);font-size:22px;font-weight:800;">Meus Certificados</h2>
+      <p style="font-size:13px;color:var(--gray);margin-top:4px;" id="cert-sub">Seus certificados digitais de conclusão.</p>
+    </div>
+    <div class="cert-list" id="cert-list">
+      <div class="empty-state">
+        <div class="icon">🎓</div>
+        <h3>Nenhum certificado ainda</h3>
+        <p>Conclua um curso para receber seu certificado digital!</p>
+        <button class="btn-empty" onclick="showView('catalogo', document.getElementById('nav-catalogo'))">🎯 Ver cursos</button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav">
-  <a href="dashboard.html" class="bn-item active"><span class="bn-icon">🏠</span>Início</a>
-  <a href="#" class="bn-item"><span class="bn-icon">🎯</span>Cursos</a>
-  <a href="certificado.html" class="bn-item"><span class="bn-icon">🎓</span>Certs</a>
-  <a href="perfil.html" class="bn-item"><span class="bn-icon">👤</span>Perfil</a>
+  <button class="bn-item active" id="bn-inicio" onclick="showView('inicio', document.getElementById('nav-inicio')); atualizarBN('bn-inicio')"><span class="bn-icon">🏠</span>Início</button>
+  <button class="bn-item" id="bn-cursos" onclick="showView('meus-cursos', document.getElementById('nav-cursos')); atualizarBN('bn-cursos')"><span class="bn-icon">📚</span>Cursos</button>
+  <button class="bn-item" id="bn-conquistas" onclick="showView('conquistas', document.getElementById('nav-conquistas')); atualizarBN('bn-conquistas')"><span class="bn-icon">🏆</span>Conquistas</button>
+  <button class="bn-item" id="bn-certificados" onclick="showView('certificados', document.getElementById('nav-certificados')); atualizarBN('bn-certificados')"><span class="bn-icon">🎓</span>Certs</button>
+  <button class="bn-item" onclick="window.location.href='perfil.html'"><span class="bn-icon">👤</span>Perfil</button>
 </nav>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const app = initializeApp({
     apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
@@ -275,52 +379,114 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Data
   const days = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
   const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const now = new Date();
   document.getElementById('topbar-date').textContent = `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]}`;
 
+  const cursosFixos = [
+    { id:'inteligencia-emocional', emoji:'🧠', titulo:'Inteligência Emocional', cat:'Desenvolvimento Pessoal', desc:'8 aulas · 3h 20min', cor:'c1', status:'Disponível' },
+    { id:'mercado-trabalho', emoji:'💼', titulo:'Mercado de Trabalho', cat:'Carreira', desc:'12 aulas · 5h 10min', cor:'c2', status:'Disponível' },
+    { id:'autoconhecimento', emoji:'🌱', titulo:'Autoconhecimento', cat:'Desenvolvimento Pessoal', desc:'6 aulas · 2h 45min', cor:'c3', status:'Disponível' },
+    { id:'comunicacao', emoji:'🗣️', titulo:'Comunicação Assertiva', cat:'Comunicação', desc:'10 aulas · 4h 00min', cor:'c4', status:'Disponível' },
+    { id:'empreendedorismo', emoji:'💡', titulo:'Empreendedorismo', cat:'Negócios', desc:'9 aulas · 3h 50min', cor:'c5', status:'Em breve' },
+    { id:'lideranca', emoji:'🤝', titulo:'Liderança Positiva', cat:'Liderança', desc:'7 aulas · 3h 00min', cor:'c6', status:'Em breve' },
+    { id:'saude', emoji:'🏃', titulo:'Saúde e Bem-estar', cat:'Saúde', desc:'5 aulas · 2h 15min', cor:'c7', status:'Em breve' },
+    { id:'financas', emoji:'💰', titulo:'Educação Financeira', cat:'Finanças', desc:'8 aulas · 3h 30min', cor:'c8', status:'Em breve' },
+  ];
+
+  const conquistas = [
+    { icon:'🌱', nome:'Primeiro Passo', desc:'Criou sua conta na SER+', campo:'criadoEm', sempre:true },
+    { icon:'📚', nome:'Aprendiz', desc:'Iniciou o primeiro curso', campo:'cursosIniciados', min:1 },
+    { icon:'🎓', nome:'Graduado', desc:'Concluiu o primeiro curso', campo:'certificados', min:1 },
+    { icon:'🔥', nome:'7 Dias Seguidos', desc:'Estudou por 7 dias seguidos', campo:'streak', min:7 },
+    { icon:'⚡', nome:'Veloz', desc:'Completou 3 aulas no primeiro dia', campo:'conquVeloz' },
+    { icon:'🏆', nome:'Colecionador', desc:'Conquistou 3 certificados', campo:'certificados', min:3 },
+    { icon:'💎', nome:'Dedicado', desc:'Estudou por 30 dias seguidos', campo:'streak', min:30 },
+    { icon:'🚀', nome:'Nível 5', desc:'Alcançou o Nível 5', campo:'nivel', min:5 },
+  ];
+
+  let userData = {};
+  let cursosProgresso = [];
+  let certificadosData = [];
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = 'login.html'; return; }
+
     const nome = user.displayName || user.email.split('@')[0];
     document.getElementById('greeting').textContent = `Olá, ${nome.split(' ')[0]} 👋`;
     document.getElementById('sidebar-name').textContent = nome;
-    if (user.photoURL) {
-      document.getElementById('sidebar-avatar').innerHTML = `<img src="${user.photoURL}" alt="foto">`;
+
+    const foto = user.photoURL;
+    if (foto) {
+      document.getElementById('sidebar-avatar').innerHTML = `<img src="${foto}">`;
+      document.getElementById('topbar-avatar').innerHTML = `<img src="${foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     }
+
+    // Carrega dados do usuário
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) {
-        const d = snap.data();
-        const nivel = d.nivel || 1; const xp = d.xp || 0;
+        userData = snap.data();
+        const nivel = userData.nivel || 1;
+        const xp = userData.xp || 0;
         const pct = Math.min((xp / (nivel * 1000)) * 100, 100);
         document.getElementById('sidebar-level').textContent = `⭐ Nível ${nivel}`;
         document.getElementById('xp-bar').style.width = pct + '%';
         document.getElementById('xp-label').textContent = `${xp} / ${nivel * 1000} XP para o Nível ${nivel + 1}`;
         document.getElementById('xp-msg').textContent = `Você está indo bem, ${nome.split(' ')[0]}!`;
-        document.getElementById('badge-streak').textContent = d.streak || 0;
-        document.getElementById('badge-certs').textContent = d.certificados || 0;
+        document.getElementById('badge-streak').textContent = userData.streak || 0;
+        document.getElementById('badge-certs').textContent = userData.certificados || 0;
       }
     } catch(e) {}
 
-    carregarCatalogo();
-    carregarProgresso(user.uid);
+    // Carrega progresso
+    try {
+      const snap = await getDocs(collection(db, 'progress', user.uid, 'cursos'));
+      snap.forEach(d => cursosProgresso.push({ id: d.id, ...d.data() }));
+    } catch(e) {}
+
+    // Carrega certificados
+    try {
+      const q = query(collection(db, 'certificates'), where('alunoId', '==', user.uid));
+      const snap = await getDocs(q);
+      snap.forEach(d => certificadosData.push({ id: d.id, ...d.data() }));
+    } catch(e) {}
+
+    // Renderiza tudo
+    renderInicio();
+    renderCatalogo();
+    renderMeusCursos();
+    renderConquistas();
+    renderCertificados();
+
     document.getElementById('loading').style.display = 'none';
   });
 
-  const cursosFixos = [
-    { id:'inteligencia-emocional', emoji:'🧠', titulo:'Inteligência Emocional', desc:'8 aulas · 3h 20min', cor:'c1', status:'Disponível' },
-    { id:'mercado-trabalho', emoji:'💼', titulo:'Mercado de Trabalho', desc:'12 aulas · 5h 10min', cor:'c2', status:'Disponível' },
-    { id:'autoconhecimento', emoji:'🌱', titulo:'Autoconhecimento', desc:'6 aulas · 2h 45min', cor:'c3', status:'Disponível' },
-    { id:'comunicacao', emoji:'🗣️', titulo:'Comunicação Assertiva', desc:'10 aulas · 4h 00min', cor:'c4', status:'Disponível' },
-    { id:'empreendedorismo', emoji:'💡', titulo:'Empreendedorismo', desc:'9 aulas · 3h 50min', cor:'c5', status:'Em breve' },
-    { id:'lideranca', emoji:'🤝', titulo:'Liderança Positiva', desc:'7 aulas · 3h 00min', cor:'c6', status:'Em breve' },
-    { id:'saude', emoji:'🏃', titulo:'Saúde e Bem-estar', desc:'5 aulas · 2h 15min', cor:'c7', status:'Em breve' },
-    { id:'financas', emoji:'💰', titulo:'Educação Financeira', desc:'8 aulas · 3h 30min', cor:'c8', status:'Em breve' },
-  ];
+  // ── RENDER INÍCIO ──
+  function renderInicio() {
+    // Cursos em andamento
+    const cores = ['g1','g2','g3'];
+    if (cursosProgresso.length > 0) {
+      document.getElementById('prog-count').textContent = `${cursosProgresso.length} curso${cursosProgresso.length>1?'s':''}`;
+      document.getElementById('progress-list-inicio').innerHTML = cursosProgresso.map((c,i) => {
+        const curso = cursosFixos.find(x => x.id === c.id) || { emoji:'📚', titulo:c.id, cat:'Curso' };
+        return `
+          <div class="prog-card" onclick="window.location.href='curso.html?id=${c.id}'">
+            <div class="prog-thumb ${cores[i%3]}">${curso.emoji}</div>
+            <div class="prog-info">
+              <div class="prog-cat">${curso.cat || 'Curso'}</div>
+              <h3>${curso.titulo}</h3>
+              <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${c.progresso||0}%"></div></div>
+              <div class="prog-meta"><span><strong>${c.progresso||0}%</strong> concluído</span></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
 
-  function carregarCatalogo() {
-    document.getElementById('catalog-grid').innerHTML = cursosFixos.map(c => `
+    // Catálogo resumido (4 primeiros)
+    document.getElementById('catalog-grid-inicio').innerHTML = cursosFixos.slice(0,4).map(c => `
       <div class="cat-card" onclick="window.location.href='curso.html?id=${c.id}'">
         <div class="cat-thumb ${c.cor}">${c.emoji}</div>
         <div class="cat-body">
@@ -328,43 +494,108 @@
           <p>${c.desc}</p>
           <span class="cat-tag" style="${c.status!=='Disponível'?'background:#FFF3E0;color:#E65100;':''}">${c.status}</span>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  async function carregarProgresso(uid) {
-    try {
-      const snap = await getDocs(collection(db, 'progress', uid, 'cursos'));
-      const cursos = [];
-      snap.forEach(d => cursos.push({ id: d.id, ...d.data() }));
-      document.getElementById('badge-streak');
-      if (cursos.length === 0) return;
-      document.getElementById('prog-count').textContent = `${cursos.length} curso${cursos.length>1?'s':''}`;
-      const cores = ['g1','g2','g3'];
-      document.getElementById('progress-list').innerHTML = cursos.map((c,i) => {
-        const curso = cursosFixos.find(x => x.id === c.id) || { emoji:'📚', titulo: c.id };
-        return `
-          <div class="prog-card" onclick="window.location.href='curso.html?id=${c.id}'">
-            <div class="prog-thumb ${cores[i%3]}">
-              ${curso.emoji}
-              <div class="play-overlay"><div class="play-circle">▶</div></div>
-            </div>
-            <div class="prog-info">
-              <div class="prog-cat">Curso</div>
-              <h3>${curso.titulo}</h3>
-              <div class="prog-bar-wrap"><div class="prog-bar-fill" style="width:${c.progresso||0}%"></div></div>
-              <div class="prog-meta"><span><strong>${c.progresso||0}%</strong> concluído</span></div>
-            </div>
-          </div>`;
-      }).join('');
-    } catch(e) {}
+  // ── RENDER CATÁLOGO ──
+  let filtroAtivo = 'todos';
+  function renderCatalogo() {
+    const lista = filtroAtivo === 'todos' ? cursosFixos : cursosFixos.filter(c => c.status === filtroAtivo);
+    document.getElementById('catalog-grid-catalogo').innerHTML = lista.map(c => `
+      <div class="cat-card" onclick="window.location.href='curso.html?id=${c.id}'">
+        <div class="cat-thumb ${c.cor}">${c.emoji}</div>
+        <div class="cat-body">
+          <h4>${c.titulo}</h4>
+          <p>${c.cat} · ${c.desc}</p>
+          <span class="cat-tag" style="${c.status!=='Disponível'?'background:#FFF3E0;color:#E65100;':''}">${c.status}</span>
+        </div>
+      </div>`).join('');
   }
 
+  window.filtrar = (tipo, btn) => {
+    filtroAtivo = tipo;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCatalogo();
+  };
+
+  // ── RENDER MEUS CURSOS ──
+  function renderMeusCursos() {
+    const cores = ['g1','g2','g3'];
+    document.getElementById('meus-cursos-sub').textContent = `${cursosProgresso.length} curso${cursosProgresso.length!==1?'s':''} em andamento.`;
+    if (cursosProgresso.length === 0) return;
+    document.getElementById('meus-cursos-list').innerHTML = cursosProgresso.map((c,i) => {
+      const curso = cursosFixos.find(x => x.id === c.id) || { emoji:'📚', titulo:c.id, cat:'Curso' };
+      const pct = c.progresso || 0;
+      return `
+        <div class="mc-card" onclick="window.location.href='curso.html?id=${c.id}'">
+          <div class="mc-thumb ${cores[i%3]}">${curso.emoji}</div>
+          <div class="mc-info">
+            <div class="mc-cat">${curso.cat || 'Curso'}</div>
+            <h3>${curso.titulo}</h3>
+            <div class="mc-bar-wrap"><div class="mc-bar-fill" style="width:${pct}%"></div></div>
+            <div class="mc-meta"><strong>${pct}%</strong> concluído · Módulo ${c.moduloAtual||1}</div>
+          </div>
+          <div class="mc-action">
+            <button class="btn-continuar">${pct >= 100 ? '✓ Concluído' : '▶ Continuar'}</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER CONQUISTAS ──
+  function renderConquistas() {
+    const desbloqueadas = conquistas.filter(c => {
+      if (c.sempre) return true;
+      if (c.min !== undefined) return (userData[c.campo] || 0) >= c.min;
+      return userData[c.campo] === true;
+    }).length;
+    document.getElementById('conq-sub').textContent = `${desbloqueadas} de ${conquistas.length} conquistas desbloqueadas.`;
+    document.getElementById('conquistas-grid').innerHTML = conquistas.map(c => {
+      let desbloqueada = false;
+      if (c.sempre) desbloqueada = true;
+      else if (c.min !== undefined) desbloqueada = (userData[c.campo] || 0) >= c.min;
+      else desbloqueada = userData[c.campo] === true;
+      return `
+        <div class="conq-card ${desbloqueada ? '' : 'locked'}">
+          <div class="conq-icon">${c.icon}</div>
+          <div class="conq-nome">${c.nome}</div>
+          <div class="conq-desc">${c.desc}</div>
+          <span class="conq-badge ${desbloqueada ? '' : 'locked-badge'}">${desbloqueada ? '✓ Desbloqueada' : '🔒 Bloqueada'}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER CERTIFICADOS ──
+  function renderCertificados() {
+    document.getElementById('cert-sub').textContent = `${certificadosData.length} certificado${certificadosData.length!==1?'s':''} emitido${certificadosData.length!==1?'s':''}.`;
+    if (certificadosData.length === 0) return;
+    document.getElementById('cert-list').innerHTML = certificadosData.map(c => `
+      <div class="cert-card">
+        <div class="cert-medal">🏅</div>
+        <div class="cert-info">
+          <h4>${c.cursoTitulo || '—'}</h4>
+          <p>Emitido em ${c.emitidoEm ? c.emitidoEm.toDate().toLocaleDateString('pt-BR') : '—'} · ID: ${c.id.substring(0,12).toUpperCase()}</p>
+        </div>
+        <div class="cert-actions">
+          <a href="certificado.html?id=${c.id}" class="btn-sm btn-green">⬇ Baixar</a>
+          <button class="btn-sm btn-outline-sm" onclick="compartilhar('${c.id}')">🔗 Compartilhar</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.compartilhar = (id) => {
+    const url = `${window.location.origin}/certificado.html?id=${id}`;
+    if (navigator.share) navigator.share({ title: 'Meu certificado SER+', url });
+    else { navigator.clipboard.writeText(url); alert('Link copiado! ✅'); }
+  };
+
+  // Logout
   document.getElementById('btn-logout').addEventListener('click', async () => {
     await signOut(auth); window.location.href = 'login.html';
   });
 
-  // Mobile sidebar
+  // Sidebar mobile
   window.abrirSidebar = () => {
     document.getElementById('sidebar').classList.add('open');
     document.getElementById('overlay').classList.add('show');
@@ -376,5 +607,24 @@
     document.body.style.overflow = '';
   };
 </script>
+
+<script>
+  // Navegação entre views
+  window.showView = (name, btn) => {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    window.fecharSidebar && window.fecharSidebar();
+    window.scrollTo(0, 0);
+  };
+
+  // Bottom nav ativo
+  window.atualizarBN = (id) => {
+    document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  };
+</script>
+
 </body>
 </html>
