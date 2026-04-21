@@ -10,9 +10,6 @@
     "firebase:seed": "node scripts/seed-firebase.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1034.0",
-    "@aws-sdk/s3-request-presigner": "^3.1034.0",
-    "@next-auth/firebase-adapter": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "firebase": "^12.12.1",
     "firebase-admin": "^13.8.0",
