@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SER+ | Entrar</title>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -68,30 +72,20 @@
   @media (max-width: 768px) {
     body { grid-template-columns: 1fr; min-height: 100vh; }
     .left { display: none; }
-    .right { padding: 32px 24px; align-items: flex-start; padding-top: 48px; }
+    .right { padding: 48px 24px; align-items: flex-start; }
     .login-box { max-width: 100%; }
     .login-box h1 { font-size: 26px; }
-
-    /* Logo mobile no topo */
-    .right::before {
-      content: 'SER+';
-      font-family: var(--font-display);
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--green);
-      display: block;
-      margin-bottom: 24px;
-    }
   }
 
   @media (max-width: 400px) {
-    .right { padding: 24px 16px; }
+    .right { padding: 32px 16px; }
     .btn-google { font-size: 14px; padding: 13px 18px; }
   }
 </style>
 </head>
 <body>
 
+<!-- LADO ESQUERDO -->
 <div class="left">
   <div class="left-content">
     <div class="logo">SER+</div>
@@ -105,39 +99,75 @@
   </div>
 </div>
 
+<!-- LADO DIREITO -->
 <div class="right">
   <div class="login-box">
     <h1 id="form-title">Bem-vindo de volta 👋</h1>
     <p class="subtitle" id="form-subtitle">Entre na sua conta para continuar aprendendo.</p>
+
     <div class="error-msg" id="error-msg"></div>
     <div class="success-msg" id="success-msg"></div>
+
+    <!-- Login Google -->
     <button class="btn-google" id="btn-google" onclick="loginGoogle()">
       <span class="google-icon"></span>
       Continuar com Google
     </button>
+
     <div class="divider">ou</div>
+
+    <!-- Form login -->
     <div id="form-login">
-      <div class="form-group"><label>E-mail</label><input type="email" id="input-email" placeholder="seu@email.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="input-senha" placeholder="••••••••"></div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="input-email" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="input-senha" placeholder="••••••••">
+      </div>
       <button class="btn-primary" id="btn-submit" onclick="loginEmail()">Entrar</button>
-      <div class="toggle-form">Não tem conta? <a onclick="toggleForm()">Criar conta grátis</a></div>
+      <div class="toggle-form">
+        Não tem conta? <a onclick="toggleForm()">Criar conta grátis</a>
+      </div>
     </div>
+
+    <!-- Form cadastro -->
     <div id="form-cadastro" style="display:none;">
-      <div class="form-group"><label>Nome completo</label><input type="text" id="input-nome" placeholder="Seu nome"></div>
-      <div class="form-group"><label>E-mail</label><input type="email" id="input-email-cad" placeholder="seu@email.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="input-senha-cad" placeholder="Mínimo 6 caracteres"></div>
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="input-nome" placeholder="Seu nome completo">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="input-email-cad" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="input-senha-cad" placeholder="Mínimo 6 caracteres">
+      </div>
       <button class="btn-primary" id="btn-cadastro" onclick="cadastrar()">Criar minha conta</button>
-      <div class="toggle-form">Já tem conta? <a onclick="toggleForm()">Entrar</a></div>
+      <div class="toggle-form">
+        Já tem conta? <a onclick="toggleForm()">Entrar</a>
+      </div>
     </div>
+
     <p class="terms">Ao entrar, você concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a>.</p>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    updateProfile, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  // ── FIREBASE CONFIG ──────────────────────────────────────
   const app = initializeApp({
     apiKey: "AIzaSyCMx1xOGr876NJsjIguvV6BchhuVVrJAOM",
     authDomain: "ser-mais-7d338.firebaseapp.com",
@@ -151,80 +181,162 @@
   const db = getFirestore(app);
   const googleProvider = new GoogleAuthProvider();
 
-  onAuthStateChanged(auth, (user) => { if (user) window.location.href = 'dashboard.html'; });
+  // ── EMAILJS CONFIG ───────────────────────────────────────
+  // ⚠️ Substitua pelos seus dados do EmailJS (emailjs.com)
+  const EMAILJS_SERVICE  = "service_XXXXXXX";   // ← seu Service ID
+  const EMAILJS_TEMPLATE = "template_XXXXXXX";  // ← seu Template ID
+  const EMAILJS_KEY      = "SUA_PUBLIC_KEY";    // ← sua Public Key
+  // ─────────────────────────────────────────────────────────
 
+  // Se já está logado, redireciona
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.href = 'dashboard.html';
+  });
+
+  // ── SALVAR USUÁRIO NO FIRESTORE ──────────────────────────
   async function salvarUsuario(user) {
     const ref = doc(db, 'users', user.uid);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
-      await setDoc(ref, { uid: user.uid, nome: user.displayName || '', email: user.email, foto: user.photoURL || '', role: 'aluno', nivel: 1, xp: 0, streak: 0, certificados: 0, criadoEm: serverTimestamp() });
+      // Usuário novo — salva no banco
+      await setDoc(ref, {
+        uid: user.uid,
+        nome: user.displayName || '',
+        email: user.email,
+        foto: user.photoURL || '',
+        role: 'aluno',
+        nivel: 1,
+        xp: 0,
+        streak: 0,
+        certificados: 0,
+        criadoEm: serverTimestamp()
+      });
+      // Envia e-mail de boas-vindas apenas para novos usuários
+      await enviarBoasVindas(user.displayName || 'Aluno(a)', user.email);
     }
   }
 
+  // ── E-MAIL DE BOAS-VINDAS ────────────────────────────────
+  async function enviarBoasVindas(nome, email) {
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE,
+        EMAILJS_TEMPLATE,
+        {
+          nome: nome.split(' ')[0], // envia só o primeiro nome
+          email: email,
+          link: "https://ser-mais-gray.vercel.app/dashboard.html"
+        },
+        EMAILJS_KEY
+      );
+      console.log('✅ E-mail de boas-vindas enviado para', email);
+    } catch(e) {
+      // Não bloqueia o login se o e-mail falhar
+      console.log('⚠️ Erro ao enviar e-mail:', e);
+    }
+  }
+
+  // ── LOGIN COM GOOGLE ─────────────────────────────────────
   window.loginGoogle = async () => {
     const btn = document.getElementById('btn-google');
-    btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Conectando...';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> Conectando...';
     try {
-      const r = await signInWithPopup(auth, googleProvider);
-      await salvarUsuario(r.user);
+      const result = await signInWithPopup(auth, googleProvider);
+      await salvarUsuario(result.user);
       mostrarSucesso('Login realizado! Redirecionando...');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);
     } catch(e) {
       mostrarErro('Erro ao conectar com Google. Tente novamente.');
-      btn.disabled = false; btn.innerHTML = '<span class="google-icon"></span> Continuar com Google';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="google-icon"></span> Continuar com Google';
     }
   };
 
+  // ── LOGIN COM E-MAIL ─────────────────────────────────────
   window.loginEmail = async () => {
-    const email = document.getElementById('input-email').value;
+    const email = document.getElementById('input-email').value.trim();
     const senha = document.getElementById('input-senha').value;
     if (!email || !senha) return mostrarErro('Preencha e-mail e senha.');
     const btn = document.getElementById('btn-submit');
-    btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Entrando...';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> Entrando...';
     try {
       await signInWithEmailAndPassword(auth, email, senha);
       mostrarSucesso('Login realizado! Redirecionando...');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);
     } catch(e) {
-      const msgs = { 'auth/user-not-found':'E-mail não encontrado.', 'auth/wrong-password':'Senha incorreta.', 'auth/invalid-email':'E-mail inválido.', 'auth/too-many-requests':'Muitas tentativas. Aguarde.' };
+      const msgs = {
+        'auth/user-not-found': 'E-mail não encontrado. Crie uma conta!',
+        'auth/wrong-password': 'Senha incorreta. Tente novamente.',
+        'auth/invalid-email': 'E-mail inválido.',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento.',
+        'auth/invalid-credential': 'E-mail ou senha incorretos.'
+      };
       mostrarErro(msgs[e.code] || 'Erro ao entrar. Tente novamente.');
-      btn.disabled = false; btn.innerHTML = 'Entrar';
+      btn.disabled = false;
+      btn.innerHTML = 'Entrar';
     }
   };
 
+  // ── CADASTRO ─────────────────────────────────────────────
   window.cadastrar = async () => {
-    const nome = document.getElementById('input-nome').value;
-    const email = document.getElementById('input-email-cad').value;
+    const nome  = document.getElementById('input-nome').value.trim();
+    const email = document.getElementById('input-email-cad').value.trim();
     const senha = document.getElementById('input-senha-cad').value;
     if (!nome || !email || !senha) return mostrarErro('Preencha todos os campos.');
-    if (senha.length < 6) return mostrarErro('Senha deve ter no mínimo 6 caracteres.');
+    if (senha.length < 6) return mostrarErro('A senha deve ter no mínimo 6 caracteres.');
     const btn = document.getElementById('btn-cadastro');
-    btn.disabled = true; btn.innerHTML = '<span class="loading"></span> Criando conta...';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> Criando conta...';
     try {
-      const r = await createUserWithEmailAndPassword(auth, email, senha);
-      await updateProfile(r.user, { displayName: nome });
-      await salvarUsuario({ ...r.user, displayName: nome });
+      const result = await createUserWithEmailAndPassword(auth, email, senha);
+      await updateProfile(result.user, { displayName: nome });
+      await salvarUsuario({ ...result.user, displayName: nome });
       mostrarSucesso('Conta criada! Redirecionando...');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);
     } catch(e) {
-      const msgs = { 'auth/email-already-in-use':'E-mail já cadastrado.', 'auth/invalid-email':'E-mail inválido.', 'auth/weak-password':'Senha muito fraca.' };
-      mostrarErro(msgs[e.code] || 'Erro ao criar conta.');
-      btn.disabled = false; btn.innerHTML = 'Criar minha conta';
+      const msgs = {
+        'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
+        'auth/invalid-email': 'E-mail inválido.',
+        'auth/weak-password': 'Senha muito fraca. Use pelo menos 6 caracteres.'
+      };
+      mostrarErro(msgs[e.code] || 'Erro ao criar conta. Tente novamente.');
+      btn.disabled = false;
+      btn.innerHTML = 'Criar minha conta';
     }
   };
 
+  // ── TOGGLE FORMULÁRIO ────────────────────────────────────
   window.toggleForm = () => {
     const isLogin = document.getElementById('form-login').style.display !== 'none';
-    document.getElementById('form-login').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('form-login').style.display    = isLogin ? 'none'  : 'block';
     document.getElementById('form-cadastro').style.display = isLogin ? 'block' : 'none';
-    document.getElementById('form-title').textContent = isLogin ? 'Criar conta grátis 🌱' : 'Bem-vindo de volta 👋';
+    document.getElementById('form-title').textContent    = isLogin ? 'Criar conta grátis 🌱' : 'Bem-vindo de volta 👋';
     document.getElementById('form-subtitle').textContent = isLogin ? 'Preencha seus dados para começar.' : 'Entre na sua conta para continuar aprendendo.';
-    document.getElementById('error-msg').style.display = 'none';
-    document.getElementById('success-msg').style.display = 'none';
+    esconderMensagens();
   };
 
-  function mostrarErro(msg) { const e = document.getElementById('error-msg'); e.textContent = '⚠️ ' + msg; e.style.display = 'block'; document.getElementById('success-msg').style.display = 'none'; }
-  function mostrarSucesso(msg) { const e = document.getElementById('success-msg'); e.textContent = '✅ ' + msg; e.style.display = 'block'; document.getElementById('error-msg').style.display = 'none'; }
+  // ── MENSAGENS ────────────────────────────────────────────
+  function mostrarErro(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = '⚠️ ' + msg;
+    el.style.display = 'block';
+    document.getElementById('success-msg').style.display = 'none';
+  }
+
+  function mostrarSucesso(msg) {
+    const el = document.getElementById('success-msg');
+    el.textContent = '✅ ' + msg;
+    el.style.display = 'block';
+    document.getElementById('error-msg').style.display = 'none';
+  }
+
+  function esconderMensagens() {
+    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'none';
+  }
 </script>
+
 </body>
 </html>
