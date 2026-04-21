@@ -1,0 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --green: #009C3B;
+  --green-dark: #007A2E;
+  --green-light: #E8F8EE;
+  --green-mid: #C5EDDA;
+  --white: #FFFFFF;
+  --off-white: #F7FAF8;
+  --gray-light: #F0F4F2;
+  --gray: #8A9E94;
+  --gray-dark: #3D4F46;
+  --black: #1A2620;
+  
+  --font-display: 'Baloo 2', cursive;
+  --font-body: 'DM Sans', sans-serif;
+  
+  --sidebar-w: 240px;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--white);
+  color: var(--black);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ─── TYPOGRAPHY ────────────────────────── */
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+/* ─── BUTTONS ───────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.22s;
+  text-decoration: none;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 156, 59, 0.3);
+}
+
+.btn-primary:hover {
+  background: var(--green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 156, 59, 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--green);
+  border: 2px solid var(--green);
+}
+
+.btn-outline:hover {
+  background: var(--green-light);
+  transform: translateY(-2px);
+}
+
+/* ─── UTILITIES ─────────────────────────── */
+
+.glass {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 156, 59, 0.1);
+}
+
+.card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--gray-light);
+}
+
+/* ─── MOBILE SIDEBAR OVERLAY ────────────── */
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 49;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 51;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--green);
+  border: none;
+  color: white;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ─── ANIMATIONS ────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* ─── FOCUS STATES ──────────────────────── */
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px rgba(0,156,59,0.1);
+}
+
+/* ─── SCROLLBAR ─────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+
+/* ─── RESPONSIVE: TABLETS ───────────────── */
+
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-w: 0px;
+  }
+  
+  .sidebar-desktop {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar-desktop.open {
+    transform: translateX(0);
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  .card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+
+/* ─── RESPONSIVE: MOBILE ────────────────── */
+
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr !important;
+    padding: 80px 24px 60px !important;
+    min-height: auto !important;
+  }
+  
+  .hero-visual {
+    display: none !important;
+  }
+  
+  .hero h1 {
+    font-size: 36px !important;
+  }
+  
+  .card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  table th, table td {
+    padding: 10px 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+}
